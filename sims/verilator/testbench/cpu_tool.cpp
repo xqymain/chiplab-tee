@@ -80,7 +80,7 @@ void CpuTool::parse_args(int argc, char **argv, char **env) {
         PARSE_INT64(time_limit,"--time-limit")
         PARSE_FLAG(time_check,"--time-check")
 
-        PARSE_FLAG(enable_fork,"--enable-fork")
+        PARSE_FLAG(enable_fork,"--fork-child")
 
         PARSE_INT64(save_bp_time,"--save-bp-time")
         PARSE_STR(ram_save_bp_file,"--ram-save-bp-file")

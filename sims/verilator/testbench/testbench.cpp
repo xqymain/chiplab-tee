@@ -241,7 +241,7 @@ void CpuTestbench::simulate(vluint64_t& main_time) {
     auto end = std::chrono::steady_clock::now();
     #ifdef TRACE_COMP
     if(!(emask & status_test_end)){
-        emu->set_need_weekup();
+        emu->set_need_wakeup();
         for (int i = 0; i < NUM_CORES; i++) {
             difftest[i]->display();
         }
@@ -261,6 +261,7 @@ void CpuTestbench::simulate(vluint64_t& main_time) {
     EVAL;
 #undef EVAL
     display_exit_cause(main_time,emask);
+    delete emu;
     close();
 }
 

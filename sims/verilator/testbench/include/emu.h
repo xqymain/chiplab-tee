@@ -40,7 +40,7 @@ public:
     /* do init work such as init_difftest, init_nemuproxy */
     void init_emu(vluint64_t* main_time);
     void init_random_vlog(const char *path, const char *file_in);
-    void set_need_weekup(){
+    void set_need_wakeup(){
         need_wakeup=true;
     }
 

@@ -1,3 +1,4 @@
+#include <cstdio>
 #include <sys/mman.h>
 #include <stdlib.h>
 #include "emu.h"
@@ -69,10 +70,10 @@ Emulator::Emulator(Vtop *top, const char *path, const char *file_out, const char
     #ifdef RAND_TEST
     init_random_vlog(path, data_vlog);
     #endif
-  if (enable_fork) {
-    lightsss = new LightSSS;
-    FORK_PRINTF("enable fork debugging...\n")
-  }
+    if (enable_fork) {
+        lightsss = new LightSSS;
+        FORK_PRINTF("enable fork debugging...\n")
+    }
 }
 
 void Emulator::init_emu(vluint64_t* main_time) {
@@ -200,7 +201,6 @@ int Emulator::process() {
             FORK_PRINTF("checkpoint has reached the main process abort point: %lu\n", *main_time)
         }
         if (*main_time == lightsss->get_end_cycles() + 10) {
-            // trapCode = STATE_ABORT;
             return status_fork_forward;
             //因情况修改
         }
@@ -328,15 +328,15 @@ void Emulator::fork_child_init() {
 #endif
 #endif
 
-  FORK_PRINTF("the oldest checkpoint start to dump wave and dump nemu log...\n")
+    FORK_PRINTF("the oldest checkpoint start to dump wave and dump nemu log...\n")
     if (!tb->m_trace) {
     #ifdef DUMP_VCD
         tb->m_trace = new VerilatedVcdC;
-        const char wavename[] = "./logs/simu_trace.vcd";
+        const char wavename[] = "./logs/fork_simu_trace.vcd";
     #endif
     #ifdef DUMP_FST
         tb->m_trace = new VerilatedFstC;
-        const char wavename[] = "./logs/simu_trace.fst";
+        const char wavename[] = "./logs/fork_simu_trace.fst";
     #endif
         top->trace(tb->m_trace, 99);
         tb->m_trace->open(wavename);
