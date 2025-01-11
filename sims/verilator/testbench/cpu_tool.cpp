@@ -10,6 +10,8 @@ int CpuTool::simu_bus_delay_random_seed = 0x5500ff;
 int64_t CpuTool::time_limit = 30000;
 int CpuTool::time_check = 0;
 
+int CpuTool::enable_fork = 0;
+
 int64_t CpuTool::save_bp_time = 0;
 int64_t CpuTool::restore_bp_time = 0;
 
@@ -77,6 +79,8 @@ void CpuTool::parse_args(int argc, char **argv, char **env) {
 
         PARSE_INT64(time_limit,"--time-limit")
         PARSE_FLAG(time_check,"--time-check")
+
+        PARSE_FLAG(enable_fork,"--enable-fork")
 
         PARSE_INT64(save_bp_time,"--save-bp-time")
         PARSE_STR(ram_save_bp_file,"--ram-save-bp-file")

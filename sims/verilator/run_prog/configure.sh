@@ -66,6 +66,10 @@ echo "  --tail-simu-trace		tail simu_trace.txt with trace-tail-size ns(default: 
 	 "
 echo "  --trace-tail-size size	simu trace tail clock size(default: 100000)
 	 "
+echo "  --enable-fork           enable folking child processes to debug
+     "
+echo "  --disable-fork          disable folking child processes to debug
+     "
 } 
 
 THREAD=1
@@ -92,6 +96,9 @@ TAIL_SIMU_TRACE=n
 TRACE_TAIL_SIZE=100000
 DEAD_CLOCK_EN=y
 DEAD_CLOCK_SIZE=10000
+FORK_CHILD=n
+SLOT_SIZE=2
+WAIT_INTERVAL=5
 CONFIG_LOG="./configure.sh"
 
 #get opt 
@@ -204,6 +211,14 @@ do
         -h|-help|--help)
             usage 
             exit 0;;
+        -enable-fork|--enable-fork)
+            FORK_CHILD=y
+            CONFIG_LOG="$CONFIG_LOG $1" 
+            shift ;; 
+        -disable-fork|--disable-ork)
+            FORK_CHILD=n
+            CONFIG_LOG="$CONFIG_LOG $1" 
+            shift ;; 
         --|-)
             shift 
             break ;;
@@ -489,6 +504,9 @@ echo "TAIL_SIMU_TRACE=$TAIL_SIMU_TRACE" >> $CONFIG_SOFT
 echo "TRACE_TAIL_SIZE=$TRACE_TAIL_SIZE" >> $CONFIG_SOFT
 echo "DEAD_CLOCK_EN=$DEAD_CLOCK_EN" >> $CONFIG_SOFT
 echo "DEAD_CLOCK_SIZE=$DEAD_CLOCK_SIZE" >> $CONFIG_SOFT
+echo "FORK_CHILD=$FORK_CHILD" >> $CONFIG_SOFT
+echo "SLOT_SIZE=$SLOT_SIZE" >> $CONFIG_SOFT
+echo "WAIT_INTERVAL=$WAIT_INTERVAL" >> $CONFIG_SOFT
 
 if [ ! -f "$CONFIG_LOG_FILE" ]; then 
     touch $CONFIG_LOG_FILE 

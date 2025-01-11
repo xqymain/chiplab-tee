@@ -12,6 +12,8 @@ public:
     static const int status_trace_err_pc = 0x200;
     static const int status_perf_err     = 0x400;
 
+    static const int status_fork_forward = 0x800;
+
     static const int status_exit         = 0x1f000;
     static const int status_call_finish  = 0x1000;
     static const int status_uart_exit    = 0x2000;
@@ -41,6 +43,8 @@ public:
 
     static int64_t time_limit;
     static int time_check;
+
+    static int enable_fork;
 
     static int dump_pc_trace;
     static int dump_rf_trace;

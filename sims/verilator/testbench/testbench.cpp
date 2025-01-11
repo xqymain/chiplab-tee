@@ -80,6 +80,9 @@ void CpuTestbench::display_exit_cause(vluint64_t& main_time,int emask) {
     if(emask&status_unhandled) {
         fprintf(stderr,"Reached unhandled situation.\n");
     }
+    if(emask&status_fork_forward){
+        fprintf(stderr,"Reached fork forwar(error point + 10 clk).\n");
+    }
 }
 
 long long inst_total = 0;
@@ -237,8 +240,11 @@ void CpuTestbench::simulate(vluint64_t& main_time) {
     printf("total clock is %lld\n", clock_total);
     auto end = std::chrono::steady_clock::now();
     #ifdef TRACE_COMP
-    if(!(emask & status_test_end)) for (int i = 0; i < NUM_CORES; i++) {
-        difftest[i]->display();
+    if(!(emask & status_test_end)){
+        emu->set_need_weekup();
+        for (int i = 0; i < NUM_CORES; i++) {
+            difftest[i]->display();
+        }
     }
     #endif
 
@@ -259,7 +265,7 @@ void CpuTestbench::simulate(vluint64_t& main_time) {
 }
 
 void CpuTestbench::opentrace(const char *wavename) {
-    if (!m_trace) {
+    if (!m_trace&&!enable_fork) {
     #ifdef DUMP_VCD
         m_trace = new VerilatedVcdC;
     #endif
