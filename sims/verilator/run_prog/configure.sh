@@ -66,9 +66,11 @@ echo "  --tail-simu-trace		tail simu_trace.txt with trace-tail-size ns(default: 
 	 "
 echo "  --trace-tail-size size	simu trace tail clock size(default: 100000)
 	 "
-echo "  --enable-fork           enable folking child processes to debug
+echo "  --fork-interval         How often (ms) to fork a child process
      "
-echo "  --disable-fork          disable folking child processes to debug
+echo "  --slot-size             The maximum number of child processes that can exist simultaneously, and any excess will be killed
+     "
+echo "  --wait-interval         The interval (in seconds) at which the child process checks the signal from the parent process
      "
 } 
 
@@ -96,13 +98,13 @@ TAIL_SIMU_TRACE=n
 TRACE_TAIL_SIZE=100000
 DEAD_CLOCK_EN=y
 DEAD_CLOCK_SIZE=10000
-FORK_CHILD=n
+FORK_INTERVAL=1000
 SLOT_SIZE=2
 WAIT_INTERVAL=5
 CONFIG_LOG="./configure.sh"
 
 #get opt 
-TEMP=`getopt -o h -a -l run:,threads:,reset-val:,reset-random-seed:,waveform-slice-size:,trace-slice-size:,waveform-tail-size:,trace-tail-size:,disable-trace-comp,help,output-pc-info,output-uart-info,output-nothing,disable-read-miss,disable-clk-time,dump-vcd,dump-fst,slice-waveform,disable-simu-trace,enable-mem-trace,slice-simu-trace,tail-waveform,tail-simu-trace -n "$0" -- "$@"`  
+TEMP=`getopt -o h -a -l run:,threads:,reset-val:,reset-random-seed:,waveform-slice-size:,trace-slice-size:,waveform-tail-size:,trace-tail-size:,disable-trace-comp,help,output-pc-info,output-uart-info,output-nothing,disable-read-miss,disable-clk-time,dump-vcd,dump-fst,slice-waveform,disable-simu-trace,enable-mem-trace,slice-simu-trace,tail-waveform,tail-simu-trace,fork-interval,slot-size,wait-interval -n "$0" -- "$@"`  
 
 if [ $? != 0 ]
 then 
@@ -208,17 +210,21 @@ do
             TRACE_TAIL_SIZE=$2
             CONFIG_LOG="$CONFIG_LOG $1 $2" 
             shift 2 ;;
+        -fork-interval|--fork-interval)
+            FORK_INTERVAL=$2
+            CONFIG_LOG="$CONFIG_LOG $1 $2" 
+            shift ;; 
+        -slot-size|--slot-size)
+            SLOT_SIZE=$2
+            CONFIG_LOG="$CONFIG_LOG $1 $2" 
+            shift ;; 
+        -wait-interval|--wait-interval)
+            WAIT_INTERVAL=$2
+            CONFIG_LOG="$CONFIG_LOG $1 $2" 
+            shift ;; 
         -h|-help|--help)
             usage 
             exit 0;;
-        -enable-fork|--enable-fork)
-            FORK_CHILD=y
-            CONFIG_LOG="$CONFIG_LOG $1" 
-            shift ;; 
-        -disable-fork|--disable-ork)
-            FORK_CHILD=n
-            CONFIG_LOG="$CONFIG_LOG $1" 
-            shift ;; 
         --|-)
             shift 
             break ;;
@@ -504,7 +510,7 @@ echo "TAIL_SIMU_TRACE=$TAIL_SIMU_TRACE" >> $CONFIG_SOFT
 echo "TRACE_TAIL_SIZE=$TRACE_TAIL_SIZE" >> $CONFIG_SOFT
 echo "DEAD_CLOCK_EN=$DEAD_CLOCK_EN" >> $CONFIG_SOFT
 echo "DEAD_CLOCK_SIZE=$DEAD_CLOCK_SIZE" >> $CONFIG_SOFT
-echo "FORK_CHILD=$FORK_CHILD" >> $CONFIG_SOFT
+echo "FORK_INTERVAL=$FORK_INTERVAL" >> $FORK_INTERVAL
 echo "SLOT_SIZE=$SLOT_SIZE" >> $CONFIG_SOFT
 echo "WAIT_INTERVAL=$WAIT_INTERVAL" >> $CONFIG_SOFT
 

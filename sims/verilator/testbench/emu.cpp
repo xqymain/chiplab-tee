@@ -204,7 +204,7 @@ int Emulator::process() {
             return status_fork_forward;
             //因情况修改
         }
-    }
+    }else if(!enable_fork){
 #ifdef TAIL_SIMU_TRACE
     if (tail_base + TRACE_TAIL_SIZE <= *main_time) {
         tail_base += TRACE_TAIL_SIZE;
@@ -266,6 +266,7 @@ int Emulator::process() {
 				}
 			#endif
 #endif
+    }
 
     //UART OUTPUT
     if (CONFREG_UART_DISPLAY) {
