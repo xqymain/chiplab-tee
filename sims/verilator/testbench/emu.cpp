@@ -206,68 +206,67 @@ int Emulator::process() {
         }
     }else if(!enable_fork){
 #ifdef TAIL_SIMU_TRACE
-    if (tail_base + TRACE_TAIL_SIZE <= *main_time) {
-        tail_base += TRACE_TAIL_SIZE;
-        if (trace_out) {
-            fclose(trace_out);
-        }
+        if (tail_base + TRACE_TAIL_SIZE <= *main_time) {
+            tail_base += TRACE_TAIL_SIZE;
+            if (trace_out) {
+                fclose(trace_out);
+            }
 
-        if ((trace_out = fopen(simu_out_path, "w")) == NULL) {
-            printf("simu_trace.txt open error!!!!\n");
-            fprintf(trace_out, "simu_trace.txt open error!!!!\n");
-            exit(0);
+            if ((trace_out = fopen(simu_out_path, "w")) == NULL) {
+                printf("simu_trace.txt open error!!!!\n");
+                fprintf(trace_out, "simu_trace.txt open error!!!!\n");
+                exit(0);
+            }
         }
-    }
 #endif
 
 #ifdef SLICE_SIMU_TRACE
     #ifdef TAIL_SIMU_TRACE
-				if (tail_base + TRACE_TAIL_SIZE <= *main_time)
-					tail_base += TRACE_TAIL_SIZE;
+        if (tail_base + TRACE_TAIL_SIZE <= *main_time)
+            tail_base += TRACE_TAIL_SIZE;
 
-				if (trace_next_start <= *main_time) {
-					close();
-					char suffix[80];
-					int simu_out_path_index = prefix_end;
-					int suffix_index = 0;
-					sprintf(suffix, ".%ldns-%ldns", trace_next_start - tail_base, trace_next_start + TRACE_SLICE_SIZE - tail_base);
-					while(suffix[suffix_index] != '\0') {
-						simu_out_path[simu_out_path_index] = suffix[suffix_index];
-						simu_out_path_index++;
-						suffix_index++;
-					}
-					simu_out_path[simu_out_path_index] = '\0';
-					trace_next_start += TRACE_SLICE_SIZE;
-    		    	if ((trace_out = fopen(simu_out_path, "w")) == NULL) {
-    		    	    printf("simu_trace.txt open error!!!!\n");
-    		    	    fprintf(trace_out, "simu_trace.txt open error!!!!\n");
-    		    	    exit(0);
-    		    	}
-				}
-			#else
-				if (trace_next_start <= *main_time) {
-					close();
-					char suffix[80];
-					int simu_out_path_index = prefix_end;
-					int suffix_index = 0;
-					sprintf(suffix, ".%ldns-%ldns", trace_next_start, trace_next_start+TRACE_SLICE_SIZE);
-					while(suffix[suffix_index] != '\0') {
-						simu_out_path[simu_out_path_index] = suffix[suffix_index];
-						simu_out_path_index++;
-						suffix_index++;
-					}
-					simu_out_path[simu_out_path_index] = '\0';
-					trace_next_start += TRACE_SLICE_SIZE;
-    		    	if ((trace_out = fopen(simu_out_path, "w")) == NULL) {
-    		    	    printf("simu_trace.txt open error!!!!\n");
-    		    	    fprintf(trace_out, "simu_trace.txt open error!!!!\n");
-    		    	    exit(0);
-    		    	}
-				}
-			#endif
+        if (trace_next_start <= *main_time) {
+            close();
+            char suffix[80];
+            int simu_out_path_index = prefix_end;
+            int suffix_index = 0;
+            sprintf(suffix, ".%ldns-%ldns", trace_next_start - tail_base, trace_next_start + TRACE_SLICE_SIZE - tail_base);
+            while(suffix[suffix_index] != '\0') {
+                simu_out_path[simu_out_path_index] = suffix[suffix_index];
+                simu_out_path_index++;
+                suffix_index++;
+            }
+            simu_out_path[simu_out_path_index] = '\0';
+            trace_next_start += TRACE_SLICE_SIZE;
+            if ((trace_out = fopen(simu_out_path, "w")) == NULL) {
+                printf("simu_trace.txt open error!!!!\n");
+                fprintf(trace_out, "simu_trace.txt open error!!!!\n");
+                exit(0);
+            }
+        }
+    #else
+        if (trace_next_start <= *main_time) {
+            close();
+            char suffix[80];
+            int simu_out_path_index = prefix_end;
+            int suffix_index = 0;
+            sprintf(suffix, ".%ldns-%ldns", trace_next_start, trace_next_start+TRACE_SLICE_SIZE);
+            while(suffix[suffix_index] != '\0') {
+                simu_out_path[simu_out_path_index] = suffix[suffix_index];
+                simu_out_path_index++;
+                suffix_index++;
+            }
+            simu_out_path[simu_out_path_index] = '\0';
+            trace_next_start += TRACE_SLICE_SIZE;
+            if ((trace_out = fopen(simu_out_path, "w")) == NULL) {
+                printf("simu_trace.txt open error!!!!\n");
+                fprintf(trace_out, "simu_trace.txt open error!!!!\n");
+                exit(0);
+            }
+        }
+    #endif
 #endif
     }
-
     //UART OUTPUT
     if (CONFREG_UART_DISPLAY) {
         #ifdef OUTPUT_UART_INFO

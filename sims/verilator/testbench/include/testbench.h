@@ -70,50 +70,52 @@ public:
 
         char waveform_name[128];
         if(m_trace != NULL) {
-            #ifdef SLICE_WAVEFORM 
-				#ifdef TAIL_WAVEFORM
-					if (main_time >= tail_base+WAVEFORM_TAIL_SIZE) {
-						tail_base += WAVEFORM_TAIL_SIZE;
-					}
-                	if(main_time >= dump_next_start) {
-                	    close();
-                	    dump_next_start += WAVEFORM_SLICE_SIZE; 
-                	    #ifdef DUMP_VCD
-                	    sprintf(waveform_name, "./logs/simu_trace_%ldns_%ldns.vcd", main_time - tail_base, dump_next_start - tail_base);
-                	    #endif
-                	    #ifdef DUMP_FST
-                	    sprintf(waveform_name, "./logs/simu_trace_%ldns_%ldns.fst", main_time - tail_base, dump_next_start - tail_base);
-                	    #endif
-                	    opentrace(waveform_name);
-                	}
-				#else
-                	if(main_time >= dump_next_start) {
-                	    close();
-                	    dump_next_start += WAVEFORM_SLICE_SIZE; 
-                	    #ifdef DUMP_VCD
-                	    sprintf(waveform_name, "./logs/simu_trace_%ldns_%ldns.vcd", main_time, dump_next_start);
-                	    #endif
-                	    #ifdef DUMP_FST
-                	    sprintf(waveform_name, "./logs/simu_trace_%ldns_%ldns.fst", main_time, dump_next_start);
-                	    #endif
-                	    opentrace(waveform_name);
-                	}
-				#endif
-            #endif
-			#ifdef TAIL_WAVEFORM
-			if (main_time >= tail_base+WAVEFORM_TAIL_SIZE) {
-				tail_base += WAVEFORM_TAIL_SIZE;
-				close();
-                #ifdef DUMP_VCD 
-                opentrace("./logs/simu_trace.vcd");
-                #endif 
-                #ifdef DUMP_FST
-                opentrace("./logs/simu_trace.fst"); 
-                #endif 
-			}
-            #endif
+            if(!enable_fork){
+                #ifdef SLICE_WAVEFORM 
+                    #ifdef TAIL_WAVEFORM
+                        if (main_time >= tail_base+WAVEFORM_TAIL_SIZE) {
+                            tail_base += WAVEFORM_TAIL_SIZE;
+                        }
+                        if(main_time >= dump_next_start) {
+                            close();
+                            dump_next_start += WAVEFORM_SLICE_SIZE; 
+                            #ifdef DUMP_VCD
+                            sprintf(waveform_name, "./logs/simu_trace_%ldns_%ldns.vcd", main_time - tail_base, dump_next_start - tail_base);
+                            #endif
+                            #ifdef DUMP_FST
+                            sprintf(waveform_name, "./logs/simu_trace_%ldns_%ldns.fst", main_time - tail_base, dump_next_start - tail_base);
+                            #endif
+                            opentrace(waveform_name);
+                        }
+                    #else
+                        if(main_time >= dump_next_start) {
+                            close();
+                            dump_next_start += WAVEFORM_SLICE_SIZE; 
+                            #ifdef DUMP_VCD
+                            sprintf(waveform_name, "./logs/simu_trace_%ldns_%ldns.vcd", main_time, dump_next_start);
+                            #endif
+                            #ifdef DUMP_FST
+                            sprintf(waveform_name, "./logs/simu_trace_%ldns_%ldns.fst", main_time, dump_next_start);
+                            #endif
+                            opentrace(waveform_name);
+                        }
+                    #endif
+                #endif
+                #ifdef TAIL_WAVEFORM
+                if (main_time >= tail_base+WAVEFORM_TAIL_SIZE) {
+                    tail_base += WAVEFORM_TAIL_SIZE;
+                    close();
+                    #ifdef DUMP_VCD 
+                    opentrace("./logs/simu_trace.vcd");
+                    #endif 
+                    #ifdef DUMP_FST
+                    opentrace("./logs/simu_trace.fst"); 
+                    #endif 
+                }
+                #endif
+            }
             m_trace->dump(main_time);
-        } else if (main_time >= dump_delay && dump_waveform) {
+        } else if (main_time >= dump_delay && dump_waveform && !enable_fork) {
             #ifdef SLICE_WAVEFORM 
             	#ifdef TAIL_WAVEFORM
                 	dump_next_start = dump_delay+WAVEFORM_SLICE_SIZE;

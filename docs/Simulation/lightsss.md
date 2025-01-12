@@ -9,7 +9,7 @@ lightSSS由香山的lightSSS移植,详细原理请看开源文档：https://docs
 
 **与原先chiplab相比，std=c++11更改为std=c++14**
 
-**移植香山lightSSS代码，其他功能与原版chiplab功能一致**
+**移植香山lightSSS代码，受作者水平限制，FORK_CHILD=1开启后波形切分，保存尾波形等有关波形功能不可用！！！其他功能与原版chiplab功能一致。**
 
 ## 使用方法
 
