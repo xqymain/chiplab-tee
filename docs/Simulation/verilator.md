@@ -67,6 +67,9 @@ gtkwave simu_trace.fst                   #查看仿真波形
 - `--waveform-tail-size` : 波形所保留的末尾部分的大小，以仿真时间衡量
 - `--tail-simu-trace` : 仅保留末尾部分的`trace`
 - `--trace-tail-size` : `trace`所保留的末尾部分的大小
+- `--fork-interval` : 每多长时间（ms）fork一个子进程
+- `--slot-size`     : 同时最多支持多少个子进程存在，多余的会被kill掉
+- `--wait-interval` : 子进程每隔多长时间（seconds）检查父进程的信号
 
 ### 运行参数配置
 ```
@@ -75,6 +78,7 @@ Makefile_run
 运行参数在该文件中进行配置，参数更改后仅需重新开始仿真即可生效，即`make`中的最后一个流程。
 - `DUMP_DELAY` : 波形起始时间
 - `DUMP_WAVEFORM` : 是否生成波形
+- `FORK_CHILD`:是否允许子进程 (lightSSS)
 - `TIME_LIMIT` : 仿真时间限制 (设零无限制)	     
 - `BUS_DELAY` : 总线是否引入随机延迟
 - `BUS_DELAY_RANDOM_SEED` : 总线延迟随机种子
