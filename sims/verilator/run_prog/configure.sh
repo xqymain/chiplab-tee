@@ -104,7 +104,7 @@ WAIT_INTERVAL=5
 CONFIG_LOG="./configure.sh"
 
 #get opt 
-TEMP=`getopt -o h -a -l run:,threads:,reset-val:,reset-random-seed:,waveform-slice-size:,trace-slice-size:,waveform-tail-size:,trace-tail-size:,disable-trace-comp,help,output-pc-info,output-uart-info,output-nothing,disable-read-miss,disable-clk-time,dump-vcd,dump-fst,slice-waveform,disable-simu-trace,enable-mem-trace,slice-simu-trace,tail-waveform,tail-simu-trace,fork-interval,slot-size,wait-interval -n "$0" -- "$@"`  
+TEMP=`getopt -o h -a -l run:,threads:,reset-val:,reset-random-seed:,waveform-slice-size:,trace-slice-size:,waveform-tail-size:,trace-tail-size:,disable-trace-comp,help,output-pc-info,output-uart-info,output-nothing,disable-read-miss,disable-clk-time,dump-vcd,dump-fst,slice-waveform,disable-simu-trace,enable-mem-trace,slice-simu-trace,tail-waveform,tail-simu-trace,fork-interval:,slot-size:,wait-interval: -n "$0" -- "$@"`  
 
 if [ $? != 0 ]
 then 
@@ -213,15 +213,15 @@ do
         -fork-interval|--fork-interval)
             FORK_INTERVAL=$2
             CONFIG_LOG="$CONFIG_LOG $1 $2" 
-            shift ;; 
+            shift 2;; 
         -slot-size|--slot-size)
             SLOT_SIZE=$2
             CONFIG_LOG="$CONFIG_LOG $1 $2" 
-            shift ;; 
+            shift 2;; 
         -wait-interval|--wait-interval)
             WAIT_INTERVAL=$2
             CONFIG_LOG="$CONFIG_LOG $1 $2" 
-            shift ;; 
+            shift 2;; 
         -h|-help|--help)
             usage 
             exit 0;;
@@ -510,7 +510,7 @@ echo "TAIL_SIMU_TRACE=$TAIL_SIMU_TRACE" >> $CONFIG_SOFT
 echo "TRACE_TAIL_SIZE=$TRACE_TAIL_SIZE" >> $CONFIG_SOFT
 echo "DEAD_CLOCK_EN=$DEAD_CLOCK_EN" >> $CONFIG_SOFT
 echo "DEAD_CLOCK_SIZE=$DEAD_CLOCK_SIZE" >> $CONFIG_SOFT
-echo "FORK_INTERVAL=$FORK_INTERVAL" >> $FORK_INTERVAL
+echo "FORK_INTERVAL=$FORK_INTERVAL" >> $CONFIG_SOFT
 echo "SLOT_SIZE=$SLOT_SIZE" >> $CONFIG_SOFT
 echo "WAIT_INTERVAL=$WAIT_INTERVAL" >> $CONFIG_SOFT
 
