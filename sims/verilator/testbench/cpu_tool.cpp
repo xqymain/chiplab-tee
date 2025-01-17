@@ -121,10 +121,13 @@ void CpuTool::parse_args(int argc, char **argv, char **env) {
     #if VERILATOR_VERSION_INTEGER >= 5016000
     //enable fork open
     #else
-    printf(“LightSSS does not support the current version. Please upgrade the Verilator version greater than v5.016.”);
+    printf("LightSSS does not support the current version. Please upgrade the Verilator version greater than v5.016.");
     exit(1);
     #endif                 // check VERILATOR_VERSION_INTEGER values
 #elif EMU_THREAD > 1   // VERILATOR_VERSION_INTEGER not defined
+    printf("LightSSS does not support the current version. Please upgrade the Verilator version greater than v5.016.");
+    exit(1);
+    //An untested version, theoretically supporting lightSSS.
     #ifdef VERILATOR_4_210 // v4.210 <= version < 4.220
     //enable fork open
     #else                  // older than v4.210
