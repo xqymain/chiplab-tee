@@ -4,7 +4,7 @@ lightSSS由香山的lightSSS移植,详细原理请看开源文档：https://docs
 
 旨在尽可能降低仿真波形带来的开销，同时尽可能保留波形信息，提升debuger效率。
 
-## lightSSS区别
+## lightSSS 使用注意事项
 **lightSSS仅支持verilator版本大于5.016，请将版本更新至5.016以上**
 
 **与原先chiplab相比，std=c++11更改为std=c++14**

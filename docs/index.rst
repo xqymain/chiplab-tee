@@ -13,6 +13,7 @@ Welcome to chiplab's documentation!
    Quick-Start
    Simulation/verilator
    Simulation/difftest
+   Simulation/lightsss
    FPGA_run_linux/linux_run
    FPGA_run_linux/flash
    Debug/debug
