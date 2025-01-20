@@ -1,6 +1,9 @@
+#include <cstdio>
 #include <sys/mman.h>
 #include <stdlib.h>
 #include "emu.h"
+#include "lightsss.h"
+#include "testbench.h"
 
 FILE* trace_out;
 FILE* uart_out;
@@ -13,6 +16,7 @@ void *get_img_start() { return &ram[0]; }
 static unsigned long trace_next_start = 0;
 static int prefix_end;
 static unsigned long tail_base = 0;
+extern CpuTestbench* tb;
 
 std::chrono::nanoseconds diff_nano_seconds = std::chrono::nanoseconds(0);
 
@@ -66,6 +70,10 @@ Emulator::Emulator(Vtop *top, const char *path, const char *file_out, const char
     #ifdef RAND_TEST
     init_random_vlog(path, data_vlog);
     #endif
+    if (enable_fork) {
+        lightsss = new LightSSS;
+        FORK_PRINTF("enable fork debugging...\n")
+    }
 }
 
 void Emulator::init_emu(vluint64_t* main_time) {
@@ -188,68 +196,77 @@ void Emulator::close() {
 }
 
 int Emulator::process() {
+    if (enable_fork && is_fork_child() && main_time != 0) {
+        if (*main_time == lightsss->get_end_cycles()) {
+            FORK_PRINTF("checkpoint has reached the main process abort point: %lu\n", *main_time)
+        }
+        if (*main_time == lightsss->get_end_cycles() + 10) {
+            return status_fork_forward;
+            //因情况修改
+        }
+    }else if(!enable_fork){
 #ifdef TAIL_SIMU_TRACE
-    if (tail_base + TRACE_TAIL_SIZE <= *main_time) {
-        tail_base += TRACE_TAIL_SIZE;
-        if (trace_out) {
-            fclose(trace_out);
-        }
+        if (tail_base + TRACE_TAIL_SIZE <= *main_time) {
+            tail_base += TRACE_TAIL_SIZE;
+            if (trace_out) {
+                fclose(trace_out);
+            }
 
-        if ((trace_out = fopen(simu_out_path, "w")) == NULL) {
-            printf("simu_trace.txt open error!!!!\n");
-            fprintf(trace_out, "simu_trace.txt open error!!!!\n");
-            exit(0);
+            if ((trace_out = fopen(simu_out_path, "w")) == NULL) {
+                printf("simu_trace.txt open error!!!!\n");
+                fprintf(trace_out, "simu_trace.txt open error!!!!\n");
+                exit(0);
+            }
         }
-    }
 #endif
 
 #ifdef SLICE_SIMU_TRACE
     #ifdef TAIL_SIMU_TRACE
-				if (tail_base + TRACE_TAIL_SIZE <= *main_time)
-					tail_base += TRACE_TAIL_SIZE;
+        if (tail_base + TRACE_TAIL_SIZE <= *main_time)
+            tail_base += TRACE_TAIL_SIZE;
 
-				if (trace_next_start <= *main_time) {
-					close();
-					char suffix[80];
-					int simu_out_path_index = prefix_end;
-					int suffix_index = 0;
-					sprintf(suffix, ".%ldns-%ldns", trace_next_start - tail_base, trace_next_start + TRACE_SLICE_SIZE - tail_base);
-					while(suffix[suffix_index] != '\0') {
-						simu_out_path[simu_out_path_index] = suffix[suffix_index];
-						simu_out_path_index++;
-						suffix_index++;
-					}
-					simu_out_path[simu_out_path_index] = '\0';
-					trace_next_start += TRACE_SLICE_SIZE;
-    		    	if ((trace_out = fopen(simu_out_path, "w")) == NULL) {
-    		    	    printf("simu_trace.txt open error!!!!\n");
-    		    	    fprintf(trace_out, "simu_trace.txt open error!!!!\n");
-    		    	    exit(0);
-    		    	}
-				}
-			#else
-				if (trace_next_start <= *main_time) {
-					close();
-					char suffix[80];
-					int simu_out_path_index = prefix_end;
-					int suffix_index = 0;
-					sprintf(suffix, ".%ldns-%ldns", trace_next_start, trace_next_start+TRACE_SLICE_SIZE);
-					while(suffix[suffix_index] != '\0') {
-						simu_out_path[simu_out_path_index] = suffix[suffix_index];
-						simu_out_path_index++;
-						suffix_index++;
-					}
-					simu_out_path[simu_out_path_index] = '\0';
-					trace_next_start += TRACE_SLICE_SIZE;
-    		    	if ((trace_out = fopen(simu_out_path, "w")) == NULL) {
-    		    	    printf("simu_trace.txt open error!!!!\n");
-    		    	    fprintf(trace_out, "simu_trace.txt open error!!!!\n");
-    		    	    exit(0);
-    		    	}
-				}
-			#endif
+        if (trace_next_start <= *main_time) {
+            close();
+            char suffix[80];
+            int simu_out_path_index = prefix_end;
+            int suffix_index = 0;
+            sprintf(suffix, ".%ldns-%ldns", trace_next_start - tail_base, trace_next_start + TRACE_SLICE_SIZE - tail_base);
+            while(suffix[suffix_index] != '\0') {
+                simu_out_path[simu_out_path_index] = suffix[suffix_index];
+                simu_out_path_index++;
+                suffix_index++;
+            }
+            simu_out_path[simu_out_path_index] = '\0';
+            trace_next_start += TRACE_SLICE_SIZE;
+            if ((trace_out = fopen(simu_out_path, "w")) == NULL) {
+                printf("simu_trace.txt open error!!!!\n");
+                fprintf(trace_out, "simu_trace.txt open error!!!!\n");
+                exit(0);
+            }
+        }
+    #else
+        if (trace_next_start <= *main_time) {
+            close();
+            char suffix[80];
+            int simu_out_path_index = prefix_end;
+            int suffix_index = 0;
+            sprintf(suffix, ".%ldns-%ldns", trace_next_start, trace_next_start+TRACE_SLICE_SIZE);
+            while(suffix[suffix_index] != '\0') {
+                simu_out_path[simu_out_path_index] = suffix[suffix_index];
+                simu_out_path_index++;
+                suffix_index++;
+            }
+            simu_out_path[simu_out_path_index] = '\0';
+            trace_next_start += TRACE_SLICE_SIZE;
+            if ((trace_out = fopen(simu_out_path, "w")) == NULL) {
+                printf("simu_trace.txt open error!!!!\n");
+                fprintf(trace_out, "simu_trace.txt open error!!!!\n");
+                exit(0);
+            }
+        }
+    #endif
 #endif
-
+    }
     //UART OUTPUT
     if (CONFREG_UART_DISPLAY) {
         #ifdef OUTPUT_UART_INFO
@@ -266,6 +283,21 @@ int Emulator::process() {
     trapCode = dm->do_step(*main_time);
     auto end = std::chrono::steady_clock::now();
     diff_nano_seconds += std::chrono::nanoseconds(end-start);
+
+    if (enable_fork) {
+        static bool have_initial_fork = false;
+        uint64_t timer = uptime();
+        // check if it's time to fork a checkpoint process
+        if (((timer - lasttime_snapshot > FORK_INTERVAL) || !have_initial_fork) && !is_fork_child()) {
+            have_initial_fork = true;
+            lasttime_snapshot = timer;
+            switch (lightsss->do_fork()) {
+                case FORK_ERROR: return -1;
+                case FORK_CHILD: fork_child_init();
+                default: break;
+            }
+        }
+    }
     switch (trapCode) {
         case STATE_RUNNING:
             return 0;
@@ -278,9 +310,51 @@ int Emulator::process() {
     }
 }
 
+void Emulator::fork_child_init() {
+#ifdef VERILATOR_VERSION_INTEGER // >= v4.220
+    #if VERILATOR_VERSION_INTEGER >= 5016000
+    // This will cause 288 bytes leaked for each one fork call.
+    // However, one million snapshots cause only 288MB leaks, which is still acceptable.
+    // See verilator/test_regress/t/t_wrapper_clone.cpp:48 to avoid leaks.
+    top->atClone();
+    #else
+    // #error Please use Verilator v5.016 or newer versions.
+    #endif                 // check VERILATOR_VERSION_INTEGER values
+#elif EMU_THREAD > 1   // VERILATOR_VERSION_INTEGER not defined
+    #ifdef VERILATOR_4_210 // v4.210 <= version < 4.220
+    top->vlSymsp->__Vm_threadPoolp = new VlThreadPool(top->contextp(), EMU_THREAD - 1, 0);
+    #else                  // older than v4.210
+    top->__Vm_threadPoolp = new VlThreadPool(top->contextp(), EMU_THREAD - 1, 0);
+    #endif
+#endif
+
+    FORK_PRINTF("the oldest checkpoint start to dump wave and dump nemu log...\n")
+    if (!tb->m_trace) {
+    #ifdef DUMP_VCD
+        tb->m_trace = new VerilatedVcdC;
+        const char wavename[] = "./logs/fork_simu_trace.vcd";
+    #endif
+    #ifdef DUMP_FST
+        tb->m_trace = new VerilatedFstC;
+        const char wavename[] = "./logs/fork_simu_trace.fst";
+    #endif
+        top->trace(tb->m_trace, 99);
+        tb->m_trace->open(wavename);
+    }
+}
+
 Emulator::~Emulator() {
     fclose(trace_out);
     fclose(uart_out);
+    if (enable_fork && !is_fork_child()) {
+        if (need_wakeup) {
+            lightsss->wakeup_child(*main_time);
+        } else {
+            lightsss->do_clear();
+        }
+        delete lightsss;
+    }
+
     delete dm;
     dm = NULL;
 }

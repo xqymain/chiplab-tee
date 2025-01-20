@@ -10,6 +10,8 @@ extern char* chiplab_home;
 // Current simulation time (64-bit unsigned)
 vluint64_t main_time = 0;
 double sc_time_stamp() {return main_time;}
+struct timeval start, end;
+CpuTestbench* tb;
 
 void init_verilator(int argc, char** argv, char** env){
     if (0 && argc && argv && env) {}
@@ -46,9 +48,9 @@ int main(int argc, char** argv, char** env) {
     }
 
     init_verilator(argc,argv,env);
-    CpuTestbench* tb = new CpuTestbench(argc,argv,env,&main_time); 
+    tb = new CpuTestbench(argc,argv,env,&main_time); 
 
-    struct timeval start, end;
+
     gettimeofday(&start, NULL);
 
     tb->simulate(main_time); 

@@ -10,6 +10,8 @@ int CpuTool::simu_bus_delay_random_seed = 0x5500ff;
 int64_t CpuTool::time_limit = 30000;
 int CpuTool::time_check = 0;
 
+int CpuTool::enable_fork = 0;
+
 int64_t CpuTool::save_bp_time = 0;
 int64_t CpuTool::restore_bp_time = 0;
 
@@ -78,6 +80,8 @@ void CpuTool::parse_args(int argc, char **argv, char **env) {
         PARSE_INT64(time_limit,"--time-limit")
         PARSE_FLAG(time_check,"--time-check")
 
+        PARSE_FLAG(enable_fork,"--fork-child")
+
         PARSE_INT64(save_bp_time,"--save-bp-time")
         PARSE_STR(ram_save_bp_file,"--ram-save-bp-file")
         PARSE_STR(top_save_bp_file,"--top-save-bp-file")
@@ -112,6 +116,26 @@ void CpuTool::parse_args(int argc, char **argv, char **env) {
 
         PARSE_HEX (end_pc,"--end-pc")
     }
+    if(enable_fork){
+#ifdef VERILATOR_VERSION_INTEGER // >= v4.220
+    #if VERILATOR_VERSION_INTEGER >= 5016000
+    //enable fork open
+    #else
+    printf("LightSSS does not support the current version. Please upgrade the Verilator version greater than v5.016.");
+    exit(1);
+    #endif                 // check VERILATOR_VERSION_INTEGER values
+#elif EMU_THREAD > 1   // VERILATOR_VERSION_INTEGER not defined
+    printf("LightSSS does not support the current version. Please upgrade the Verilator version greater than v5.016.");
+    exit(1);
+    //An untested version, theoretically supporting lightSSS.
+    #ifdef VERILATOR_4_210 // v4.210 <= version < 4.220
+    //enable fork open
+    #else                  // older than v4.210
+    //enable fork open
+    #endif
+#endif
+    }
+
 #undef PARSE_INT
 #undef PARSE_STR
 #undef PARSE_FLAG

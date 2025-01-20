@@ -27,3 +27,5 @@ sims/verilator/run_random/log
 sims/verilator/run_random/config-generator.mak
 obj/
 software/examples/random_res
+compile_commands.json
+sims/verilator/.cache/clangd/index/*.*

@@ -14,9 +14,13 @@
 
 #include <verilated.h>
 #include <verilated_save.h>
+#include <sys/time.h>
 #include "Vsimu_top.h"
 typedef Vsimu_top Vtop;
 
 extern std::chrono::nanoseconds diff_nano_seconds;
 extern std::chrono::nanoseconds nemu_nano_seconds;
+
+extern struct timeval start, end;
+
 #endif //CHIPLAB_COMMON_H
