@@ -19,10 +19,10 @@ module uart_debug_axi(
     //Read address channel
     output      [ 3:0] arid,
     output reg  [31:0] araddr,
-    output      [ 3:0] arlen,
+    output      [ 7:0] arlen,
     output      [ 2:0] arsize,
     output      [ 1:0] arburst,
-    output      [ 1:0] arlock,
+    output             arlock,
     output      [ 3:0] arcache,
     output      [ 2:0] arprot,
     output reg         arvalid,
@@ -37,16 +37,15 @@ module uart_debug_axi(
     //Write address channel
     output   [ 3:0] awid,
     output reg      [31:0] awaddr,
-    output   [ 3:0] awlen,
+    output   [ 7:0] awlen,
     output   [ 2:0] awsize,
     output   [ 1:0] awburst,
-    output   [ 1:0] awlock,
+    output          awlock,
     output   [ 3:0] awcache,
     output   [ 2:0] awprot,
     output reg      awvalid,
     input           awready,
     //Write data channel
-    output   [ 3:0] wid,
     output reg  [31:0] wdata,
     output   [ 3:0] wstrb,
     output reg         wlast,
@@ -135,21 +134,20 @@ module uart_debug_axi(
 
     //AXI访存输出控制
     assign arid         = 4'h2;
-    assign arlen        = 4'h0;
+    assign arlen        = 8'h0;
     assign arsize       = 3'h2;
     assign arburst      = 2'h1;
-    assign arlock       = 2'h0;
+    assign arlock       = 1'h0;
     assign arcache      = 4'h0;
     assign arprot       = 3'h0;
     assign rready       = 1'h1;
     assign awid         = 4'h2;
-    assign awlen        = 4'h0;
+    assign awlen        = 8'h0;
     assign awsize       = 3'h2;
     assign awburst      = 2'h1;
-    assign awlock       = 2'h0;
+    assign awlock       = 1'h0;
     assign awcache      = 4'h0;
     assign awprot       = 3'h0;
-    assign wid          = 4'h2;
     assign wstrb        = uart_debug_wstrb;
     assign bready       = 1'h1;    
 

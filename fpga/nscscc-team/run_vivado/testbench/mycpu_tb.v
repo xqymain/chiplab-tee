@@ -37,9 +37,6 @@ THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 `define CONFREG_NUM_MONITOR     soc_lite.u_confreg.num_monitor
 `define CONFREG_UART_DISPLAY    soc_lite.u_confreg.write_uart_valid
 `define CONFREG_UART_DATA       soc_lite.u_confreg.write_uart_data
-`define UART_WE                 soc_lite.u_uart_wrap.u_uart.we_i
-`define UART_WADDR              soc_lite.u_uart_wrap.u_uart.waddr_i[7:0]
-`define UART_WDATA              soc_lite.u_uart_wrap.u_uart.data_i[7:0]
 `define END_PC 32'h1c000100
 
 module tb_top( );
@@ -157,8 +154,6 @@ end
 //模拟串口打印
 wire uart_display;
 wire [7:0] uart_data;
-//assign uart_display = (`UART_WE == 1'b1) && (`UART_WADDR == 8'hc);
-//assign uart_data    = `UART_WDATA;
 assign uart_display = `CONFREG_UART_DISPLAY;
 assign uart_data    = `CONFREG_UART_DATA;
 

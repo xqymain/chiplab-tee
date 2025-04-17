@@ -94,5 +94,13 @@ set_property IOSTANDARD LVCMOS33 [get_ports {btn_key_row[*]}]
 set_property IOSTANDARD LVCMOS33 [get_ports {btn_step[*]}]
 
 
-set_false_path -from [get_clocks -of_objects [get_pins fpga_pll.u_clk_pll/inst/plle2_adv_inst/CLKOUT1]] -to [get_clocks -of_objects [get_pins fpga_pll.u_clk_pll/inst/plle2_adv_inst/CLKOUT0]]
-set_false_path -from [get_clocks -of_objects [get_pins fpga_pll.u_clk_pll/inst/plle2_adv_inst/CLKOUT0]] -to [get_clocks -of_objects [get_pins fpga_pll.u_clk_pll/inst/plle2_adv_inst/CLKOUT1]]
+# set_false_path -from [get_clocks -of_objects [get_pins fpga_pll.u_clk_pll/inst/plle2_adv_inst/CLKOUT1]] -to [get_clocks -of_objects [get_pins fpga_pll.u_clk_pll/inst/plle2_adv_inst/CLKOUT0]]
+# set_false_path -from [get_clocks -of_objects [get_pins fpga_pll.u_clk_pll/inst/plle2_adv_inst/CLKOUT0]] -to [get_clocks -of_objects [get_pins fpga_pll.u_clk_pll/inst/plle2_adv_inst/CLKOUT1]]
+
+create_generated_clock -name cpu_clk [get_pins fpga_pll.u_clk_pll/inst/plle2_adv_inst/CLKOUT0]
+create_generated_clock -name sys_clk [get_pins fpga_pll.u_clk_pll/inst/plle2_adv_inst/CLKOUT1]
+create_generated_clock -name ddr_clk [get_pins fpga_pll.u_clk_pll/inst/plle2_adv_inst/CLKOUT2]
+
+set_clock_groups -asynchronous  -group [get_clocks cpu_clk] \
+                                -group [get_clocks sys_clk] \
+                                -group [get_clocks ddr_clk]
