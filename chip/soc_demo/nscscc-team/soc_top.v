@@ -53,16 +53,9 @@ THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //   > Author      : LOONGSON
 //   > Date        : 2017-08-04
 //*************************************************************************
+`include "soc_config.vh"
 
-//for simulation:
-//1. if define SIMU_USE_PLL = 1, will use clk_pll to generate cpu_clk/sys_clk,
-//   and simulation will be very slow.
-//2. usually, please define SIMU_USE_PLL=0 to speed up simulation by assign
-//   cpu_clk=clk, sys_clk = clk.
-//   at this time, frequency of cpu_clk is 91MHz.
-`define SIMU_USE_PLL 0 //set 0 to speed up simulation
-
-module soc_axi_lite_top #(parameter SIMULATION=1'b0)
+module soc_top #(parameter SIMULATION=1'b0)
 (
     input         resetn, 
     input         clk,
@@ -106,6 +99,7 @@ wire [31:0] debug_wb_rf_wdata;
 
 //clk and resetn
 reg clk_91m;
+reg clk_200m;
 wire cpu_clk;
 wire sys_clk;
 wire ddr_clk_ref;
@@ -116,16 +110,20 @@ wire sys_resetn;
 wire confreg_resetn;
 wire uart_debug_resetn;
 wire ddr_aresetn;
+wire ddr_data_init;
 
 generate if(SIMULATION && `SIMU_USE_PLL==0) begin: sim_clk
     //simulation clk.
     initial begin 
         clk_91m = 1'b0;
+        clk_200m = 1'b0;
     end
     always #5.5 clk_91m = ~clk_91m;
+    always #2.5 clk_200m = ~clk_200m;
 
     assign cpu_clk = clk_91m;
     assign sys_clk = clk;
+    assign ddr_clk_ref = clk_200m;
     rst_sync u_rst_sys(
         .clk(sys_clk),
         .rst_n_in(resetn),
@@ -133,7 +131,7 @@ generate if(SIMULATION && `SIMU_USE_PLL==0) begin: sim_clk
     );
     rst_sync u_rst_cpu(
         .clk(cpu_clk),
-        .rst_n_in(resetn),
+        .rst_n_in(resetn & ddr_data_init),
         .rst_n_out(cpu_resetn)
     );
     assign uart_debug_resetn = 1'b0;
@@ -155,7 +153,7 @@ else if(SIMULATION && `SIMU_USE_PLL==1) begin: sim_pll_clk
     );
     rst_sync u_rst_cpu(
         .clk(cpu_clk),
-        .rst_n_in(pll_locked),
+        .rst_n_in(pll_locked & ddr_data_init),
         .rst_n_out(cpu_resetn)
     );
     assign uart_debug_resetn = 1'b0;
@@ -966,7 +964,7 @@ axi_crossbar_2x3 u_axi_crossbar_2x3 (
     .m_axi_bready       ( {uart_bready  ,ram_bready ,conf_bready } )
 );
 
-generate if(SIMULATION) begin: sim_ram
+generate if(SIMULATION && `SIMU_USE_DDR==0) begin: sim_ram
 //axi ram
 axi_wrap_ram u_axi_ram
 (

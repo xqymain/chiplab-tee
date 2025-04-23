@@ -12,7 +12,7 @@ Chiplab支持龙芯杯团体赛的功能测试与性能测试，有关Chiplab的
 │　　　　　　　　├── ram_wrap&emsp;&emsp;&emsp;&emsp;&emsp;<font color='red'>axi ram 的封装层，增加固定延迟设置。</font>   
 │　　　　　　　　├── uart_debug&emsp;&emsp;&emsp;&emsp;&emsp;<font color='red'>串口下载模块。</font>   
 │　　　　　　　　├── xilinx_ip&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;<font color='red'>Xilinx IP，包含 clk_pll、axi_crossbar_2x3。</font>  
-│　　　　　　　　├── soc_axi_lite_top.v&emsp;&emsp;<font color='red'>SoC_lite 的顶层。</font>  
+│　　　　　　　　├── soc_top.v&emsp;&emsp;<font color='red'>SoC 的顶层。</font>  
 │　　　　　　　　├── soc_config.vh&emsp;&emsp;&emsp;&ensp;<font color='red'>配置SoC为功能测试或性能测试的头文件。</font>  
 │　　　　　├── loongson&emsp;&emsp;&emsp;&ensp;龙芯实验箱SoC顶层代码。   
 │　　　　　├── Baixin&emsp;&emsp;&emsp;&emsp;&emsp;&ensp;百芯开发板SoC顶层代码。   

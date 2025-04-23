@@ -28,7 +28,7 @@ add_files -scan_for_includes ../../../IP/myCPU
 # Add constraints
 add_files -fileset constrs_1 -quiet ./constraints
 
-set_property top soc_axi_lite_top [current_fileset]
+set_property top soc_top [current_fileset]
 set_property -name "top" -value "tb_top" -objects  [get_filesets sim_1]
 set_property -name {xsim.simulate.log_all_signals} -value {true} -objects [get_filesets sim_1]
 set_property strategy Flow_PerfOptimized_high [get_runs synth_1]

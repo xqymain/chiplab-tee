@@ -31,13 +31,17 @@ THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 --------------------------------------------------------------------------------
 ------------------------------------------------------------------------------*/
 `timescale 1ns / 1ps
+`include "soc_config.vh"
 
-`define CONFREG_NUM_REG         soc_lite.u_confreg.num_data
+`define CONFREG_NUM_REG         u_soc_top.u_confreg.num_data
 `define CONFREG_OPEN_TRACE      1'b0
-`define CONFREG_NUM_MONITOR     soc_lite.u_confreg.num_monitor
-`define CONFREG_UART_DISPLAY    soc_lite.u_confreg.write_uart_valid
-`define CONFREG_UART_DATA       soc_lite.u_confreg.write_uart_data
+`define CONFREG_NUM_MONITOR     u_soc_top.u_confreg.num_monitor
+`define CONFREG_UART_DISPLAY    u_soc_top.u_confreg.write_uart_valid
+`define CONFREG_UART_DATA       u_soc_top.u_confreg.write_uart_data
+`define MIG_AXI                 u_soc_top.ddr3.u_axi_wrap_ddr.mig_axi
 `define END_PC 32'h1c000100
+
+
 
 module tb_top( );
 reg resetn;
@@ -57,6 +61,22 @@ assign switch      = 8'hff;
 assign btn_key_row = 4'd0;
 assign btn_step    = 2'd3;
 
+//ddr3
+wire  [12:0]  ddr3_addr;
+wire  [2 :0]  ddr3_ba;
+wire  ddr3_ras_n;
+wire  ddr3_cas_n;
+wire  ddr3_we_n;
+wire  ddr3_odt;
+wire  ddr3_reset_n;
+wire  ddr3_cke;
+wire  [1:0]  ddr3_dm;
+wire  ddr3_ck_p;
+wire  ddr3_ck_n;
+wire  [15:0]  ddr3_dq;
+wire  [1:0]  ddr3_dqs_p;
+wire  [1:0]  ddr3_dqs_n;
+
 initial
 begin
     clk = 1'b0;
@@ -65,11 +85,11 @@ begin
     resetn = 1'b1;
 end
 always #5 clk=~clk;
-soc_axi_lite_top #(.SIMULATION(1'b1)) soc_lite
+soc_top #(.SIMULATION(1'b1)) u_soc_top
 (
        .resetn      (resetn     ), 
        .clk         (clk        ),
-    
+
         //------gpio-------
         .num_csn    (num_csn    ),
         .num_a_g    (num_a_g    ),
@@ -79,7 +99,23 @@ soc_axi_lite_top #(.SIMULATION(1'b1)) soc_lite
         .switch     (switch     ),
         .btn_key_col(btn_key_col),
         .btn_key_row(btn_key_row),
-        .btn_step   (btn_step   )
+        .btn_step   (btn_step   ),
+
+        //------ddr3-------
+        .ddr3_addr               ( ddr3_addr      ),
+        .ddr3_ba                 ( ddr3_ba        ),
+        .ddr3_ras_n              ( ddr3_ras_n     ),
+        .ddr3_cas_n              ( ddr3_cas_n     ),
+        .ddr3_we_n               ( ddr3_we_n      ),
+        .ddr3_odt                ( ddr3_odt       ),
+        .ddr3_reset_n            ( ddr3_reset_n   ),
+        .ddr3_cke                ( ddr3_cke       ),
+        .ddr3_dm                 ( ddr3_dm        ),
+        .ddr3_ck_p               ( ddr3_ck_p      ),
+        .ddr3_ck_n               ( ddr3_ck_n      ),
+        .ddr3_dq                 ( ddr3_dq        ),
+        .ddr3_dqs_p              ( ddr3_dqs_p     ),
+        .ddr3_dqs_n              ( ddr3_dqs_n     )
     );   
 
 //"cpu_clk" means cpu core clk
@@ -93,12 +129,12 @@ wire [31:0] debug_wb_pc;
 wire [3 :0] debug_wb_rf_wen;
 wire [4 :0] debug_wb_rf_wnum;
 wire [31:0] debug_wb_rf_wdata;
-assign cpu_clk           = soc_lite.cpu_clk;
-assign sys_clk           = soc_lite.sys_clk;
-assign debug_wb_pc       = soc_lite.debug_wb_pc;
-assign debug_wb_rf_wen   = soc_lite.debug_wb_rf_wen;
-assign debug_wb_rf_wnum  = soc_lite.debug_wb_rf_wnum;
-assign debug_wb_rf_wdata = soc_lite.debug_wb_rf_wdata;
+assign cpu_clk           = u_soc_top.cpu_clk;
+assign sys_clk           = u_soc_top.sys_clk;
+assign debug_wb_pc       = u_soc_top.debug_wb_pc;
+assign debug_wb_rf_wen   = u_soc_top.debug_wb_rf_wen;
+assign debug_wb_rf_wnum  = u_soc_top.debug_wb_rf_wnum;
+assign debug_wb_rf_wdata = u_soc_top.debug_wb_rf_wdata;
 
 //monitor numeric display
 reg [7:0] err_count;
@@ -201,6 +237,7 @@ begin
 	end
 end
 
+generate if(`SIMU_USE_DDR==0) begin: sim_ram_tb
 /*
 integer software_bin;
 integer err,str;
@@ -212,15 +249,141 @@ initial begin
     if(!err) begin
         for(i=0;i<262144;i=i+1) begin
             if ($fread(instr,software_bin))begin
-                soc_lite.u_axi_ram.u_fpga_sram.BRAM[i] <= {instr[7:0],instr[15:8],instr[23:16],instr[31:24]};
+                u_soc_top.u_axi_ram.u_fpga_sram.BRAM[i] <= {instr[7:0],instr[15:8],instr[23:16],instr[31:24]};
             end
             else begin
-                soc_lite.u_axi_ram.u_fpga_sram.BRAM[i] <= 32'b0;
+                u_soc_top.u_axi_ram.u_fpga_sram.BRAM[i] <= 32'b0;
             end
         end
     end
     $fclose(software_bin);
 end
 */
+end
+else begin: ddr3_tb
+
+// AXI4写数据任务
+task axi4_write;
+    input [31:0] addr;
+    input [31:0] data;
+    begin
+        // 写地址通道
+        @(posedge `MIG_AXI.ui_clk);
+        force `MIG_AXI.s_axi_awid = 4'b0001;
+        force `MIG_AXI.s_axi_awaddr = addr[26:0];
+        force `MIG_AXI.s_axi_awlen   = 8'h00;
+        force `MIG_AXI.s_axi_awsize  = 3'b010;
+        force `MIG_AXI.s_axi_awburst = 2'b01;
+        force `MIG_AXI.s_axi_awlock  = 1'b0;
+        force `MIG_AXI.s_axi_awcache = 4'b0000;
+        force `MIG_AXI.s_axi_awprot  = 3'b000;
+        force `MIG_AXI.s_axi_awqos   = 4'b0000;
+        force `MIG_AXI.s_axi_awvalid = 1'b1;
+        
+        // 等待握手完成
+        wait(`MIG_AXI.s_axi_awready);
+        @(posedge `MIG_AXI.ui_clk);
+        force `MIG_AXI.s_axi_awvalid = 1'b0;
+        
+        // 写数据通道
+        force `MIG_AXI.s_axi_wdata  = data;
+        force `MIG_AXI.s_axi_wstrb  = 4'b1111;
+        force `MIG_AXI.s_axi_wlast  = 1'b1;
+        force `MIG_AXI.s_axi_wvalid = 1'b1;
+        
+        // 等待写数据握手完成
+        wait(`MIG_AXI.s_axi_wready);
+        @(posedge `MIG_AXI.ui_clk);
+        force `MIG_AXI.s_axi_wvalid = 1'b0;
+        
+        // 等待写响应
+        force `MIG_AXI.s_axi_bready = 1'b1;
+        wait(`MIG_AXI.s_axi_bvalid);
+        @(posedge `MIG_AXI.ui_clk);
+        force `MIG_AXI.s_axi_bready = 1'b0;
+    end
+endtask
+
+// 从文件写入AXI总线的任务
+task write_file;
+    input [31:0] base_addr;  // 基地址
+    input string filename;    // 文件名
+    reg [31:0] data;         // 临时数据存储
+    integer fd;              // 文件描述符
+    integer bytes_read;      // 读取的字节数
+    integer addr_offset;     // 地址偏移
+    begin
+        // 打开二进制文件
+        fd = $fopen(filename, "rb");
+        if (fd == 0) begin
+            $display("Error: Unable to open file %s", filename);
+            return;
+        end
+        
+        addr_offset = 0;
+        
+        // 循环读取文件内容并写入AXI总线
+        while (!$feof(fd)) begin
+            bytes_read = $fread(data, fd);
+            if (bytes_read > 0) begin
+                // 调用AXI写任务
+                axi4_write(
+                    base_addr + addr_offset,  // 目标地址
+                    {data[7:0],data[15:8],data[23:16],data[31:24]} // 写入数据
+                );
+                addr_offset = addr_offset + 4;
+            end
+        end
+        
+        // 关闭文件
+        $fclose(fd);
+        release `MIG_AXI.s_axi_awid;
+        release `MIG_AXI.s_axi_awaddr;
+        release `MIG_AXI.s_axi_awlen;
+        release `MIG_AXI.s_axi_awsize;
+        release `MIG_AXI.s_axi_awburst;
+        release `MIG_AXI.s_axi_awlock;
+        release `MIG_AXI.s_axi_awcache;
+        release `MIG_AXI.s_axi_awprot;
+        release `MIG_AXI.s_axi_awqos;
+        release `MIG_AXI.s_axi_awvalid;
+        release `MIG_AXI.s_axi_wdata ;
+        release `MIG_AXI.s_axi_wstrb ;
+        release `MIG_AXI.s_axi_wlast ;
+        release `MIG_AXI.s_axi_wvalid;
+        release `MIG_AXI.s_axi_bready;
+        $display("File %s is written, and a total of %0d bytes are written", filename, addr_offset);
+    end
+endtask
+
+initial begin
+    force u_soc_top.ddr_data_init = 1'b0;
+    wait(`MIG_AXI.init_calib_complete);
+    write_file(32'h1c000000,"../../../../../inst_data.bin");
+    force u_soc_top.ddr_data_init = 1'b1;
+    release u_soc_top.ddr_data_init;
+end
+
+ddr3_model	u_ddr3_model (	
+	.rst_n   		(resetn),	
+	.ck      		(ddr3_ck_p),	
+	.ck_n    		(ddr3_ck_n),	
+	.cke     		(ddr3_cke),	
+	.cs_n    		(1'b0),	
+	.ras_n   		(ddr3_ras_n),	
+	.cas_n   		(ddr3_cas_n),	
+	.we_n    		(ddr3_we_n),	
+	.dm_tdqs 		(ddr3_dm),	
+	.ba      		(ddr3_ba),	
+	.addr    		(ddr3_addr),	
+	.dq      		(ddr3_dq),	
+	.dqs     		(ddr3_dqs_p),	
+	.dqs_n   		(ddr3_dqs_n),	
+	.tdqs_n  		(),
+	.odt     		(ddr3_odt)	
+);
+
+end
+endgenerate
 
 endmodule
