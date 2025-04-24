@@ -103,12 +103,12 @@ reg clk_200m;
 wire cpu_clk;
 wire sys_clk;
 wire ddr_clk_ref;
-wire core_rst;
+wire core_rst_n;
 wire pll_locked;
 wire cpu_resetn;
 wire sys_resetn;
 wire confreg_resetn;
-wire uart_debug_resetn;
+wire jtag_axi_resetn;
 wire ddr_aresetn;
 wire ddr_data_init;
 
@@ -134,7 +134,7 @@ generate if(SIMULATION && `SIMU_USE_PLL==0) begin: sim_clk
         .rst_n_in(resetn & ddr_data_init),
         .rst_n_out(cpu_resetn)
     );
-    assign uart_debug_resetn = 1'b0;
+    assign jtag_axi_resetn = 1'b0;
     assign confreg_resetn    = sys_resetn;
 end
 else if(SIMULATION && `SIMU_USE_PLL==1) begin: sim_pll_clk
@@ -156,7 +156,7 @@ else if(SIMULATION && `SIMU_USE_PLL==1) begin: sim_pll_clk
         .rst_n_in(pll_locked & ddr_data_init),
         .rst_n_out(cpu_resetn)
     );
-    assign uart_debug_resetn = 1'b0;
+    assign jtag_axi_resetn = 1'b0;
     assign confreg_resetn    = sys_resetn;
 end
 else begin: fpga_pll
@@ -175,11 +175,11 @@ else begin: fpga_pll
     );
     rst_sync u_rst_cpu(
         .clk(cpu_clk),
-        .rst_n_in(core_rst),
+        .rst_n_in(core_rst_n),
         .rst_n_out(cpu_resetn)
     );
-    assign uart_debug_resetn = sys_resetn;
-    assign confreg_resetn    = core_rst;
+    assign jtag_axi_resetn = sys_resetn;
+    assign confreg_resetn    = core_rst_n;
 end
 endgenerate
 
@@ -410,42 +410,42 @@ wire [1 :0] conf_bresp  ;
 wire        conf_bvalid ;
 wire        conf_bready ;
 
-//uart_debug
-wire  uart_debug_arready;
-wire  [ 3:0]  uart_debug_rid;
-wire  [31:0]  uart_debug_rdata;
-wire  [ 1:0]  uart_debug_rresp;
-wire  uart_debug_rlast;
-wire  uart_debug_rvalid;
-wire  uart_debug_awready;
-wire  uart_debug_wready;
-wire  [ 3:0]  uart_debug_bid;
-wire  [ 1:0]  uart_debug_bresp;
-wire  uart_debug_bvalid;
-wire  [ 3:0]  uart_debug_arid;
-wire  [31:0]  uart_debug_araddr;
-wire  [ 7:0]  uart_debug_arlen;
-wire  [ 2:0]  uart_debug_arsize;
-wire  [ 1:0]  uart_debug_arburst;
-wire          uart_debug_arlock;
-wire  [ 3:0]  uart_debug_arcache;
-wire  [ 2:0]  uart_debug_arprot;
-wire  uart_debug_arvalid;
-wire  uart_debug_rready;
-wire  [ 3:0]  uart_debug_awid;
-wire  [31:0]  uart_debug_awaddr;
-wire  [ 7:0]  uart_debug_awlen;
-wire  [ 2:0]  uart_debug_awsize;
-wire  [ 1:0]  uart_debug_awburst;
-wire          uart_debug_awlock;
-wire  [ 3:0]  uart_debug_awcache;
-wire  [ 2:0]  uart_debug_awprot;
-wire  uart_debug_awvalid;
-wire  [31:0]  uart_debug_wdata;
-wire  [ 3:0]  uart_debug_wstrb;
-wire  uart_debug_wlast;
-wire  uart_debug_wvalid;
-wire  uart_debug_bready;
+//jtag_axi
+wire            jtag_axi_arready;
+wire  [ 3:0]    jtag_axi_rid;
+wire  [31:0]    jtag_axi_rdata;
+wire  [ 1:0]    jtag_axi_rresp;
+wire            jtag_axi_rlast;
+wire            jtag_axi_rvalid;
+wire            jtag_axi_awready;
+wire            jtag_axi_wready;
+wire  [ 3:0]    jtag_axi_bid;
+wire  [ 1:0]    jtag_axi_bresp;
+wire            jtag_axi_bvalid;
+wire  [ 3:0]    jtag_axi_arid;
+wire  [31:0]    jtag_axi_araddr;
+wire  [ 7:0]    jtag_axi_arlen;
+wire  [ 2:0]    jtag_axi_arsize;
+wire  [ 1:0]    jtag_axi_arburst;
+wire            jtag_axi_arlock;
+wire  [ 3:0]    jtag_axi_arcache;
+wire  [ 2:0]    jtag_axi_arprot;
+wire            jtag_axi_arvalid;
+wire            jtag_axi_rready;
+wire  [ 3:0]    jtag_axi_awid;
+wire  [31:0]    jtag_axi_awaddr;
+wire  [ 7:0]    jtag_axi_awlen;
+wire  [ 2:0]    jtag_axi_awsize;
+wire  [ 1:0]    jtag_axi_awburst;
+wire            jtag_axi_awlock;
+wire  [ 3:0]    jtag_axi_awcache;
+wire  [ 2:0]    jtag_axi_awprot;
+wire            jtag_axi_awvalid;
+wire  [31:0]    jtag_axi_wdata;
+wire  [ 3:0]    jtag_axi_wstrb;
+wire            jtag_axi_wlast;
+wire            jtag_axi_wvalid;
+wire            jtag_axi_bready;
 
 //uart axi
 wire  uart_arready;
@@ -840,6 +840,49 @@ axi3_to_axi4_bridge #(
     .m_axi4_rready           ( cpu_axi4_rready    )
 );
 
+jtag_axi_wrap  u_jtag_axi_wrap (
+    .aclk                    ( sys_clk            ),
+    .aresetn                 ( jtag_axi_resetn    ),
+    .m_axi_arready           ( jtag_axi_arready   ),
+    .m_axi_rid               ( jtag_axi_rid       ),
+    .m_axi_rdata             ( jtag_axi_rdata     ),
+    .m_axi_rresp             ( jtag_axi_rresp     ),
+    .m_axi_rlast             ( jtag_axi_rlast     ),
+    .m_axi_rvalid            ( jtag_axi_rvalid    ),
+    .m_axi_awready           ( jtag_axi_awready   ),
+    .m_axi_wready            ( jtag_axi_wready    ),
+    .m_axi_bid               ( jtag_axi_bid       ),
+    .m_axi_bresp             ( jtag_axi_bresp     ),
+    .m_axi_bvalid            ( jtag_axi_bvalid    ),
+
+    .m_axi_arid              ( jtag_axi_arid      ),
+    .m_axi_araddr            ( jtag_axi_araddr    ),
+    .m_axi_arlen             ( jtag_axi_arlen     ),
+    .m_axi_arsize            ( jtag_axi_arsize    ),
+    .m_axi_arburst           ( jtag_axi_arburst   ),
+    .m_axi_arlock            ( jtag_axi_arlock    ),
+    .m_axi_arcache           ( jtag_axi_arcache   ),
+    .m_axi_arprot            ( jtag_axi_arprot    ),
+    .m_axi_arvalid           ( jtag_axi_arvalid   ),
+    .m_axi_rready            ( jtag_axi_rready    ),
+    .m_axi_awid              ( jtag_axi_awid      ),
+    .m_axi_awaddr            ( jtag_axi_awaddr    ),
+    .m_axi_awlen             ( jtag_axi_awlen     ),
+    .m_axi_awsize            ( jtag_axi_awsize    ),
+    .m_axi_awburst           ( jtag_axi_awburst   ),
+    .m_axi_awlock            ( jtag_axi_awlock    ),
+    .m_axi_awcache           ( jtag_axi_awcache   ),
+    .m_axi_awprot            ( jtag_axi_awprot    ),
+    .m_axi_awvalid           ( jtag_axi_awvalid   ),
+    .m_axi_wdata             ( jtag_axi_wdata     ),
+    .m_axi_wstrb             ( jtag_axi_wstrb     ),
+    .m_axi_wlast             ( jtag_axi_wlast     ),
+    .m_axi_wvalid            ( jtag_axi_wvalid    ),
+    .m_axi_bready            ( jtag_axi_bready    ),
+    .core_rst_n              ( core_rst_n         )
+);
+
+/*
 uart_debug  u_uart_debug (
     .clk                     ( sys_clk              ),
     .rst_n                   ( uart_debug_resetn    ),
@@ -880,50 +923,51 @@ uart_debug  u_uart_debug (
     .wlast                   ( uart_debug_wlast     ),
     .wvalid                  ( uart_debug_wvalid    ),
     .bready                  ( uart_debug_bready    ),
-    .core_rst                ( core_rst             )
+    .core_rst_n                ( core_rst_n             )
 );
+*/
 
 axi_crossbar_2x3 u_axi_crossbar_2x3 (
     .aclk               (sys_clk), 
     .aresetn            (sys_resetn), 
 
-    .s_axi_awid         ( {uart_debug_awid      ,cpu_axi4_awid}),        
-    .s_axi_awaddr       ( {uart_debug_awaddr    ,cpu_axi4_awaddr}),    
-    .s_axi_awlen        ( {uart_debug_awlen     ,cpu_axi4_awlen}),      
-    .s_axi_awsize       ( {uart_debug_awsize    ,cpu_axi4_awsize}),    
-    .s_axi_awburst      ( {uart_debug_awburst   ,cpu_axi4_awburst}), 
-    .s_axi_awlock       ( {uart_debug_awlock    ,cpu_axi4_awlock}),    
-    .s_axi_awcache      ( {uart_debug_awcache   ,cpu_axi4_awcache}), 
-    .s_axi_awprot       ( {uart_debug_awprot    ,cpu_axi4_awprot}),    
+    .s_axi_awid         ( {jtag_axi_awid      ,cpu_axi4_awid}),        
+    .s_axi_awaddr       ( {jtag_axi_awaddr    ,cpu_axi4_awaddr}),    
+    .s_axi_awlen        ( {jtag_axi_awlen     ,cpu_axi4_awlen}),      
+    .s_axi_awsize       ( {jtag_axi_awsize    ,cpu_axi4_awsize}),    
+    .s_axi_awburst      ( {jtag_axi_awburst   ,cpu_axi4_awburst}), 
+    .s_axi_awlock       ( {jtag_axi_awlock    ,cpu_axi4_awlock}),    
+    .s_axi_awcache      ( {jtag_axi_awcache   ,cpu_axi4_awcache}), 
+    .s_axi_awprot       ( {jtag_axi_awprot    ,cpu_axi4_awprot}),    
     .s_axi_awqos        ( 8'h0),     
-    .s_axi_awvalid      ( {uart_debug_awvalid   ,cpu_axi4_awvalid}),  
-    .s_axi_awready      ( {uart_debug_awready   ,cpu_axi4_awready}),          
-    .s_axi_wdata        ( {uart_debug_wdata     ,cpu_axi4_wdata}),     
-    .s_axi_wstrb        ( {uart_debug_wstrb     ,cpu_axi4_wstrb}),     
-    .s_axi_wlast        ( {uart_debug_wlast     ,cpu_axi4_wlast}),     
-    .s_axi_wvalid       ( {uart_debug_wvalid    ,cpu_axi4_wvalid}),  
-    .s_axi_wready       ( {uart_debug_wready    ,cpu_axi4_wready}),  
-    .s_axi_bid          ( {uart_debug_bid       ,cpu_axi4_bid}),          
-    .s_axi_bresp        ( {uart_debug_bresp     ,cpu_axi4_bresp}),     
-    .s_axi_bvalid       ( {uart_debug_bvalid    ,cpu_axi4_bvalid}),  
-    .s_axi_bready       ( {uart_debug_bready    ,cpu_axi4_bready}),  
-    .s_axi_arid         ( {uart_debug_arid      ,cpu_axi4_arid}),        
-    .s_axi_araddr       ( {uart_debug_araddr    ,cpu_axi4_araddr}),    
-    .s_axi_arlen        ( {uart_debug_arlen     ,cpu_axi4_arlen}),      
-    .s_axi_arsize       ( {uart_debug_arsize    ,cpu_axi4_arsize}),    
-    .s_axi_arburst      ( {uart_debug_arburst   ,cpu_axi4_arburst} ), 
-    .s_axi_arlock       ( {uart_debug_arlock    ,cpu_axi4_arlock} ),    
-    .s_axi_arcache      ( {uart_debug_arcache   ,cpu_axi4_arcache} ), 
-    .s_axi_arprot       ( {uart_debug_arprot    ,cpu_axi4_arprot} ),    
+    .s_axi_awvalid      ( {jtag_axi_awvalid   ,cpu_axi4_awvalid}),  
+    .s_axi_awready      ( {jtag_axi_awready   ,cpu_axi4_awready}),          
+    .s_axi_wdata        ( {jtag_axi_wdata     ,cpu_axi4_wdata}),     
+    .s_axi_wstrb        ( {jtag_axi_wstrb     ,cpu_axi4_wstrb}),     
+    .s_axi_wlast        ( {jtag_axi_wlast     ,cpu_axi4_wlast}),     
+    .s_axi_wvalid       ( {jtag_axi_wvalid    ,cpu_axi4_wvalid}),  
+    .s_axi_wready       ( {jtag_axi_wready    ,cpu_axi4_wready}),  
+    .s_axi_bid          ( {jtag_axi_bid       ,cpu_axi4_bid}),          
+    .s_axi_bresp        ( {jtag_axi_bresp     ,cpu_axi4_bresp}),     
+    .s_axi_bvalid       ( {jtag_axi_bvalid    ,cpu_axi4_bvalid}),  
+    .s_axi_bready       ( {jtag_axi_bready    ,cpu_axi4_bready}),  
+    .s_axi_arid         ( {jtag_axi_arid      ,cpu_axi4_arid}),        
+    .s_axi_araddr       ( {jtag_axi_araddr    ,cpu_axi4_araddr}),    
+    .s_axi_arlen        ( {jtag_axi_arlen     ,cpu_axi4_arlen}),      
+    .s_axi_arsize       ( {jtag_axi_arsize    ,cpu_axi4_arsize}),    
+    .s_axi_arburst      ( {jtag_axi_arburst   ,cpu_axi4_arburst} ), 
+    .s_axi_arlock       ( {jtag_axi_arlock    ,cpu_axi4_arlock} ),    
+    .s_axi_arcache      ( {jtag_axi_arcache   ,cpu_axi4_arcache} ), 
+    .s_axi_arprot       ( {jtag_axi_arprot    ,cpu_axi4_arprot} ),    
     .s_axi_arqos        ( 8'h0),      
-    .s_axi_arvalid      ( {uart_debug_arvalid    ,cpu_axi4_arvalid} ), 
-    .s_axi_arready      ( {uart_debug_arready    ,cpu_axi4_arready} ), 
-    .s_axi_rid          ( {uart_debug_rid        ,cpu_axi4_rid} ),          
-    .s_axi_rdata        ( {uart_debug_rdata      ,cpu_axi4_rdata} ),    
-    .s_axi_rresp        ( {uart_debug_rresp      ,cpu_axi4_rresp} ),    
-    .s_axi_rlast        ( {uart_debug_rlast      ,cpu_axi4_rlast} ),    
-    .s_axi_rvalid       ( {uart_debug_rvalid     ,cpu_axi4_rvalid} ), 
-    .s_axi_rready       ( {uart_debug_rready     ,cpu_axi4_rready} ), 
+    .s_axi_arvalid      ( {jtag_axi_arvalid    ,cpu_axi4_arvalid} ), 
+    .s_axi_arready      ( {jtag_axi_arready    ,cpu_axi4_arready} ), 
+    .s_axi_rid          ( {jtag_axi_rid        ,cpu_axi4_rid} ),          
+    .s_axi_rdata        ( {jtag_axi_rdata      ,cpu_axi4_rdata} ),    
+    .s_axi_rresp        ( {jtag_axi_rresp      ,cpu_axi4_rresp} ),    
+    .s_axi_rlast        ( {jtag_axi_rlast      ,cpu_axi4_rlast} ),    
+    .s_axi_rvalid       ( {jtag_axi_rvalid     ,cpu_axi4_rvalid} ), 
+    .s_axi_rready       ( {jtag_axi_rready     ,cpu_axi4_rready} ), 
 
     .m_axi_arid         ( {uart_arid    ,ram_arid   ,conf_arid   } ),
     .m_axi_araddr       ( {uart_araddr  ,ram_araddr ,conf_araddr } ),
