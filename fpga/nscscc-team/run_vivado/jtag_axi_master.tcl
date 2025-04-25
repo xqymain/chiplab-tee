@@ -58,48 +58,71 @@ proc ReadRegsToFile { start_addr num_regs filename } {
 
 # 打开二进制文件用于读取
 set bin_file [open "../inst_data.bin" "rb"]
+fconfigure $bin_file -translation binary
+
 # 初始地址0x1c000000
 set addr_d 469762048
-set addr_h [format "%08x" $addr_d ]
+set addr_h [format "%08x" $addr_d]
 set addr $addr_h
+
 # 复位处理器核
 WriteReg 80000000 00000000
-# 每次读取4个字节直到文件结束
-while {![eof $bin_file]} {
 
-    # 读取4字节数据
-    set data0 [read $bin_file 1]
-    set data1 [read $bin_file 1]
-    set data2 [read $bin_file 1]
-    set data3 [read $bin_file 1]
+# 一次读取1024字节(256个字)
+set chunk_size 1024
+while {![eof $bin_file]} {
+    set data [read $bin_file $chunk_size]
+    set data_len [string length $data]
+    if {$data_len == 0} break
     
-    # 如果读取的数据不足4字节,跳出循环
-    if {[string length $data3] != 1} {
-        break
+    # 准备burst传输的数据
+    set burst_data ""
+    set temp_data [list]
+    
+    # 首先收集所有数据
+    for {set i 0} {$i < $data_len} {incr i 4} {
+        if {[expr $i + 3] >= $data_len} break
+        
+        # 提取4字节数据并调整字节顺序(大端转小端)
+        set bytes_data [string range $data $i [expr $i + 3]]
+        if {[string length $bytes_data] != 4} break
+        
+        # 使用二进制扫描获取无符号字节
+        binary scan $bytes_data B* binary_data
+        set bytes [list]
+        for {set j 0} {$j < 32} {incr j 8} {
+            set byte [string range $binary_data $j [expr $j + 7]]
+            lappend bytes [expr "0b$byte"]
+        }
+        
+        # 格式化数据并添加到临时列表
+        lappend temp_data [format "%02X%02X%02X%02X" \
+            [lindex $bytes 3] \
+            [lindex $bytes 2] \
+            [lindex $bytes 1] \
+            [lindex $bytes 0]]
     }
     
-    #将data字符串转换为2个16进制数据
-    binary scan $data0 H2 var0
-    binary scan $data1 H2 var1
-    binary scan $data2 H2 var2
-    binary scan $data3 H2 var3
-
-    #将16进制数据格式化为字符串
-    set vars0 $var0;
-    set vars1 $var1;
-    set vars2 $var2;
-    set vars3 $var3;
-    set value [format "%s%s%s%s" $vars3 $vars2 $vars1 $vars0]
+    # 反转数据顺序并构建burst_data字符串
+    set temp_data [lreverse $temp_data]
+    append burst_data [join $temp_data "_"]
     
-    # 写入
-    WriteReg $addr $value
-
-    # 地址自增4
-    incr addr_d 4
-    set addr_h [format "%08x" $addr_d ]
-    set addr $addr_h
+    # 创建并执行burst写传输
+    create_hw_axi_txn burst_write_txn [get_hw_axis hw_axi_1] \
+        -address $addr \
+        -len [expr $data_len/4] \
+        -type write \
+        -data $burst_data
+    run_hw_axi burst_write_txn
+    delete_hw_axi_txn burst_write_txn
+    
+    # 更新地址
+    incr addr_d $data_len
+    set addr [format "%08x" $addr_d]
 }
+
 # 撤销复位
 WriteReg 40000000 00000000
+
 # 关闭文件
 close $bin_file
