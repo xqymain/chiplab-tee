@@ -31,9 +31,6 @@ THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 --------------------------------------------------------------------------------
 ------------------------------------------------------------------------------*/
 `include "../soc_config.vh"
-//for func test, no define RUN_PERF_TEST
-// `define RUN_PERF_TEST
-// `define RUN_PERF_NO_DELAY
 
 module axi_wrap_ram(
   input         aclk,
@@ -208,7 +205,7 @@ wire [1 :0] ram_bresp  ;
 wire        ram_bvalid ;
 wire        ram_bready ;
 
-
+/*
 // inst ram axi
 axi_ram ram(
     .s_aclk         (aclk         ),
@@ -249,8 +246,8 @@ axi_ram ram(
     .s_axi_bvalid   (ram_bvalid   ),
     .s_axi_bready   (ram_bready   )
 );
+*/
 
-/*
 wire  [31:0]    fpga_sram_raddr;
 wire  [31:0]    fpga_sram_rdata;
 wire            fpga_sram_ren;
@@ -328,7 +325,7 @@ fpga_sram_dp #(
     .ram_wen                 ( fpga_sram_wen     )
     
 );
-*/
+
 //ar
 assign ram_arid    = axi_arid   ;
 `ifdef RUN_PERF_TEST

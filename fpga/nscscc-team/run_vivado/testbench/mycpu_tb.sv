@@ -238,150 +238,150 @@ begin
 end
 
 generate if(`SIMU_USE_DDR==0) begin: sim_ram_tb
-/*
-integer software_bin;
-integer err,str;
-reg [31:0] instr;
-integer i;
-initial begin
-    software_bin = $fopen("inst_data.bin","rb");
-    err = $ferror(software_bin, str);
-    if(!err) begin
-        for(i=0;i<262144;i=i+1) begin
-            if ($fread(instr,software_bin))begin
-                u_soc_top.u_axi_ram.u_fpga_sram.BRAM[i] <= {instr[7:0],instr[15:8],instr[23:16],instr[31:24]};
-            end
-            else begin
-                u_soc_top.u_axi_ram.u_fpga_sram.BRAM[i] <= 32'b0;
+
+    integer software_bin;
+    integer err,str;
+    reg [31:0] instr;
+    integer i;
+    initial begin
+        software_bin = $fopen("../../../../../inst_data.bin","rb");
+        err = $ferror(software_bin, str);
+        if(!err) begin
+            for(i=0;i<262144;i=i+1) begin
+                if ($fread(instr,software_bin))begin
+                    u_soc_top.sim_ram.u_axi_ram.u_fpga_sram.BRAM[i] <= {instr[7:0],instr[15:8],instr[23:16],instr[31:24]};
+                end
+                else begin
+                    u_soc_top.sim_ram.u_axi_ram.u_fpga_sram.BRAM[i] <= 32'b0;
+                end
             end
         end
+        $fclose(software_bin);
     end
-    $fclose(software_bin);
-end
-*/
+
 end
 else begin: ddr3_tb
 
-// AXI4写数据任务
-task axi4_write;
-    input [31:0] addr;
-    input [31:0] data;
-    begin
-        // 写地址通道
-        @(posedge `MIG_AXI.ui_clk);
-        force `MIG_AXI.s_axi_awid = 4'b0001;
-        force `MIG_AXI.s_axi_awaddr = addr[26:0];
-        force `MIG_AXI.s_axi_awlen   = 8'h00;
-        force `MIG_AXI.s_axi_awsize  = 3'b010;
-        force `MIG_AXI.s_axi_awburst = 2'b01;
-        force `MIG_AXI.s_axi_awlock  = 1'b0;
-        force `MIG_AXI.s_axi_awcache = 4'b0000;
-        force `MIG_AXI.s_axi_awprot  = 3'b000;
-        force `MIG_AXI.s_axi_awqos   = 4'b0000;
-        force `MIG_AXI.s_axi_awvalid = 1'b1;
-        
-        // 等待握手完成
-        wait(`MIG_AXI.s_axi_awready);
-        @(posedge `MIG_AXI.ui_clk);
-        force `MIG_AXI.s_axi_awvalid = 1'b0;
-        
-        // 写数据通道
-        force `MIG_AXI.s_axi_wdata  = data;
-        force `MIG_AXI.s_axi_wstrb  = 4'b1111;
-        force `MIG_AXI.s_axi_wlast  = 1'b1;
-        force `MIG_AXI.s_axi_wvalid = 1'b1;
-        
-        // 等待写数据握手完成
-        wait(`MIG_AXI.s_axi_wready);
-        @(posedge `MIG_AXI.ui_clk);
-        force `MIG_AXI.s_axi_wvalid = 1'b0;
-        
-        // 等待写响应
-        force `MIG_AXI.s_axi_bready = 1'b1;
-        wait(`MIG_AXI.s_axi_bvalid);
-        @(posedge `MIG_AXI.ui_clk);
-        force `MIG_AXI.s_axi_bready = 1'b0;
-    end
-endtask
-
-// 从文件写入AXI总线的任务
-task write_file;
-    input [31:0] base_addr;  // 基地址
-    input string filename;    // 文件名
-    reg [31:0] data;         // 临时数据存储
-    integer fd;              // 文件描述符
-    integer bytes_read;      // 读取的字节数
-    integer addr_offset;     // 地址偏移
-    begin
-        // 打开二进制文件
-        fd = $fopen(filename, "rb");
-        if (fd == 0) begin
-            $display("Error: Unable to open file %s", filename);
-            return;
+    // AXI4写数据任务
+    task axi4_write;
+        input [31:0] addr;
+        input [31:0] data;
+        begin
+            // 写地址通道
+            @(posedge `MIG_AXI.ui_clk);
+            force `MIG_AXI.s_axi_awid = 4'b0001;
+            force `MIG_AXI.s_axi_awaddr = addr[26:0];
+            force `MIG_AXI.s_axi_awlen   = 8'h00;
+            force `MIG_AXI.s_axi_awsize  = 3'b010;
+            force `MIG_AXI.s_axi_awburst = 2'b01;
+            force `MIG_AXI.s_axi_awlock  = 1'b0;
+            force `MIG_AXI.s_axi_awcache = 4'b0000;
+            force `MIG_AXI.s_axi_awprot  = 3'b000;
+            force `MIG_AXI.s_axi_awqos   = 4'b0000;
+            force `MIG_AXI.s_axi_awvalid = 1'b1;
+            
+            // 等待握手完成
+            wait(`MIG_AXI.s_axi_awready);
+            @(posedge `MIG_AXI.ui_clk);
+            force `MIG_AXI.s_axi_awvalid = 1'b0;
+            
+            // 写数据通道
+            force `MIG_AXI.s_axi_wdata  = data;
+            force `MIG_AXI.s_axi_wstrb  = 4'b1111;
+            force `MIG_AXI.s_axi_wlast  = 1'b1;
+            force `MIG_AXI.s_axi_wvalid = 1'b1;
+            
+            // 等待写数据握手完成
+            wait(`MIG_AXI.s_axi_wready);
+            @(posedge `MIG_AXI.ui_clk);
+            force `MIG_AXI.s_axi_wvalid = 1'b0;
+            
+            // 等待写响应
+            force `MIG_AXI.s_axi_bready = 1'b1;
+            wait(`MIG_AXI.s_axi_bvalid);
+            @(posedge `MIG_AXI.ui_clk);
+            force `MIG_AXI.s_axi_bready = 1'b0;
         end
-        
-        addr_offset = 0;
-        
-        // 循环读取文件内容并写入AXI总线
-        while (!$feof(fd)) begin
-            bytes_read = $fread(data, fd);
-            if (bytes_read > 0) begin
-                // 调用AXI写任务
-                axi4_write(
-                    base_addr + addr_offset,  // 目标地址
-                    {data[7:0],data[15:8],data[23:16],data[31:24]} // 写入数据
-                );
-                addr_offset = addr_offset + 4;
+    endtask
+
+    // 从文件写入AXI总线的任务
+    task write_file;
+        input [31:0] base_addr;  // 基地址
+        input string filename;    // 文件名
+        reg [31:0] data;         // 临时数据存储
+        integer fd;              // 文件描述符
+        integer bytes_read;      // 读取的字节数
+        integer addr_offset;     // 地址偏移
+        begin
+            // 打开二进制文件
+            fd = $fopen(filename, "rb");
+            if (fd == 0) begin
+                $display("Error: Unable to open file %s", filename);
+                return;
             end
+            
+            addr_offset = 0;
+            
+            // 循环读取文件内容并写入AXI总线
+            while (!$feof(fd)) begin
+                bytes_read = $fread(data, fd);
+                if (bytes_read > 0) begin
+                    // 调用AXI写任务
+                    axi4_write(
+                        base_addr + addr_offset,  // 目标地址
+                        {data[7:0],data[15:8],data[23:16],data[31:24]} // 写入数据
+                    );
+                    addr_offset = addr_offset + 4;
+                end
+            end
+            
+            // 关闭文件
+            $fclose(fd);
+            release `MIG_AXI.s_axi_awid;
+            release `MIG_AXI.s_axi_awaddr;
+            release `MIG_AXI.s_axi_awlen;
+            release `MIG_AXI.s_axi_awsize;
+            release `MIG_AXI.s_axi_awburst;
+            release `MIG_AXI.s_axi_awlock;
+            release `MIG_AXI.s_axi_awcache;
+            release `MIG_AXI.s_axi_awprot;
+            release `MIG_AXI.s_axi_awqos;
+            release `MIG_AXI.s_axi_awvalid;
+            release `MIG_AXI.s_axi_wdata ;
+            release `MIG_AXI.s_axi_wstrb ;
+            release `MIG_AXI.s_axi_wlast ;
+            release `MIG_AXI.s_axi_wvalid;
+            release `MIG_AXI.s_axi_bready;
+            $display("File %s is written, and a total of %0d bytes are written", filename, addr_offset);
         end
-        
-        // 关闭文件
-        $fclose(fd);
-        release `MIG_AXI.s_axi_awid;
-        release `MIG_AXI.s_axi_awaddr;
-        release `MIG_AXI.s_axi_awlen;
-        release `MIG_AXI.s_axi_awsize;
-        release `MIG_AXI.s_axi_awburst;
-        release `MIG_AXI.s_axi_awlock;
-        release `MIG_AXI.s_axi_awcache;
-        release `MIG_AXI.s_axi_awprot;
-        release `MIG_AXI.s_axi_awqos;
-        release `MIG_AXI.s_axi_awvalid;
-        release `MIG_AXI.s_axi_wdata ;
-        release `MIG_AXI.s_axi_wstrb ;
-        release `MIG_AXI.s_axi_wlast ;
-        release `MIG_AXI.s_axi_wvalid;
-        release `MIG_AXI.s_axi_bready;
-        $display("File %s is written, and a total of %0d bytes are written", filename, addr_offset);
+    endtask
+
+    initial begin
+        force u_soc_top.ddr_data_init = 1'b0;
+        wait(`MIG_AXI.init_calib_complete);
+        write_file(32'h1c000000,"../../../../../inst_data.bin");
+        force u_soc_top.ddr_data_init = 1'b1;
+        release u_soc_top.ddr_data_init;
     end
-endtask
 
-initial begin
-    force u_soc_top.ddr_data_init = 1'b0;
-    wait(`MIG_AXI.init_calib_complete);
-    write_file(32'h1c000000,"../../../../../inst_data.bin");
-    force u_soc_top.ddr_data_init = 1'b1;
-    release u_soc_top.ddr_data_init;
-end
-
-ddr3_model	u_ddr3_model (	
-	.rst_n   		(resetn),	
-	.ck      		(ddr3_ck_p),	
-	.ck_n    		(ddr3_ck_n),	
-	.cke     		(ddr3_cke),	
-	.cs_n    		(1'b0),	
-	.ras_n   		(ddr3_ras_n),	
-	.cas_n   		(ddr3_cas_n),	
-	.we_n    		(ddr3_we_n),	
-	.dm_tdqs 		(ddr3_dm),	
-	.ba      		(ddr3_ba),	
-	.addr    		(ddr3_addr),	
-	.dq      		(ddr3_dq),	
-	.dqs     		(ddr3_dqs_p),	
-	.dqs_n   		(ddr3_dqs_n),	
-	.tdqs_n  		(),
-	.odt     		(ddr3_odt)	
-);
+    ddr3_model	u_ddr3_model (	
+        .rst_n   		(resetn),	
+        .ck      		(ddr3_ck_p),	
+        .ck_n    		(ddr3_ck_n),	
+        .cke     		(ddr3_cke),	
+        .cs_n    		(1'b0),	
+        .ras_n   		(ddr3_ras_n),	
+        .cas_n   		(ddr3_cas_n),	
+        .we_n    		(ddr3_we_n),	
+        .dm_tdqs 		(ddr3_dm),	
+        .ba      		(ddr3_ba),	
+        .addr    		(ddr3_addr),	
+        .dq      		(ddr3_dq),	
+        .dqs     		(ddr3_dqs_p),	
+        .dqs_n   		(ddr3_dqs_n),	
+        .tdqs_n  		(),
+        .odt     		(ddr3_odt)	
+    );
 
 end
 endgenerate
