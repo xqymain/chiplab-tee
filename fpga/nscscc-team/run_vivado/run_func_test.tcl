@@ -1,4 +1,4 @@
 #功能测试
-file copy -force ../../software/func/obj/inst_ram.mif ./loongson.sim/sim_1/behav/xsim/axi_ram.mif
+file copy -force ../../../../software/examples/func/func_src/obj/main.bin ../inst_data.bin
 restart
 run all

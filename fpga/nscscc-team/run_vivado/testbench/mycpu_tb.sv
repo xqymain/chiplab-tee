@@ -198,7 +198,7 @@ assign uart_wen = (`UART_PSEL == 1'b1) &&  (`UART_PENBLE == 1'b1) && (`UART_PWRI
 assign uart_display = (uart_wen == 1'b1) && (`UART_WADDR == 8'he0);
 assign uart_data    = `UART_WDATA;
 
-always @(posedge clk)
+always @(posedge u_soc_top.sys_clk)
 begin
     if(uart_display)
     begin
