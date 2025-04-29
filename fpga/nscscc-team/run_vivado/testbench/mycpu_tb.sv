@@ -36,8 +36,11 @@ THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 `define CONFREG_NUM_REG         u_soc_top.u_confreg.num_data
 `define CONFREG_OPEN_TRACE      1'b0
 `define CONFREG_NUM_MONITOR     u_soc_top.u_confreg.num_monitor
-`define CONFREG_UART_DISPLAY    u_soc_top.u_confreg.write_uart_valid
-`define CONFREG_UART_DATA       u_soc_top.u_confreg.write_uart_data
+`define UART_PSEL               u_soc_top.APB_DEV.uart0.PSEL
+`define UART_PENBLE             u_soc_top.APB_DEV.uart0.PENABLE
+`define UART_PWRITE             u_soc_top.APB_DEV.uart0.PWRITE
+`define UART_WADDR              u_soc_top.APB_DEV.uart0.PADDR[7:0]
+`define UART_WDATA              u_soc_top.APB_DEV.uart0.PWDATA[7:0]
 `define MIG_AXI                 u_soc_top.ddr3.u_axi_wrap_ddr.mig_axi
 `define END_PC 32'h1c000100
 
@@ -190,10 +193,12 @@ end
 //模拟串口打印
 wire uart_display;
 wire [7:0] uart_data;
-assign uart_display = `CONFREG_UART_DISPLAY;
-assign uart_data    = `CONFREG_UART_DATA;
+wire uart_wen;
+assign uart_wen = (`UART_PSEL == 1'b1) &&  (`UART_PENBLE == 1'b1) && (`UART_PWRITE == 1'b1);
+assign uart_display = (uart_wen == 1'b1) && (`UART_WADDR == 8'he0);
+assign uart_data    = `UART_WDATA;
 
-always @(posedge sys_clk)
+always @(posedge clk)
 begin
     if(uart_display)
     begin

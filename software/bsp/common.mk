@@ -15,7 +15,7 @@ all: $(TARGET)
 CFLAGS += -Dhas_cache=1 -Dcache_index_depth=0x100 -Dcache_offset_width=0x4 -Dcache_way=2
 CFLAGS += -ffunction-sections -fdata-sections
 CFLAGS += -nostartfiles -nostdlib -nostdinc -static -fno-builtin 
-CFLAGS += -DCLOCKS_PER_SEC=CORE_CLOCKS_PER_SEC -D_CLOCKS_PER_SEC_=CORE_CLOCKS_PER_SEC
+CFLAGS += -DCLOCKS_PER_SEC=CORE_CLOCKS_PER_SEC -D_CLOCKS_PER_SEC_=CORE_CLOCKS_PER_SEC -DCPU_COUNT_PER_US=100
 
 #若使用 newlib , 将下面的 -lsemihost 替换为 -lgloss
 LDFLAGS +=  	-T $(LINKER_SCRIPT) \

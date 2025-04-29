@@ -29,6 +29,7 @@ int main(int argc, char** argv)
     str = (char *)malloc(6);
     strcpy(str, "ABCDE");
     printf("String = %s,  Address = 0x%x\n", str, str);
+	printf("strcmp = %d\n", strcmp(str, "ABCDE"));
 
 	memcpy(dst, src, CPSIZE);
     printf("%s\n", dst);

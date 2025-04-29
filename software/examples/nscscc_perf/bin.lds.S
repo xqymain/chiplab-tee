@@ -1,103 +1,125 @@
+
 OUTPUT_ARCH(loongarch)
 ENTRY(_start)
 
 MEMORY
 {
   isram (rwxai) : ORIGIN = 0x1c000000, LENGTH = 512K
-  dsram (rwxai) : ORIGIN = 0x1c080000, LENGTH = 512K
+  dsram (rwxai) : ORIGIN = 0x1c080000, LENGTH = 512K  
 }
+
 SECTIONS
 {
   __stack_size = DEFINED(__stack_size) ? __stack_size : 64K;
-  .init :
+
+  .init           :
   {
     KEEP (*(SORT_NONE(.init)))
-  } >isram AT>isram
-  .ilalign :
+  } >isram AT>isram 
+
+  .ilalign         :
   {
-    . = ALIGN(16);
+    . = ALIGN(4);
     PROVIDE( _isram_lma = . );
-  } >isram AT>isram
-  .ialign :
+  } >isram AT>isram 
+
+  .ialign         :
   {
     PROVIDE( _isram = . );
-  } >isram AT>isram
-  .text :
+  } >isram AT>isram 
+
+  .text           :
   {
     _ftext = . ;
     *(.text.unlikely .text.unlikely.*)
     *(.text.startup .text.startup.*)
     *(.text .text.*)
     *(.gnu.linkonce.t.*)
-  } >isram AT>isram
-  .fini :
+  } >isram AT>isram 
+
+  .fini           :
   {
     KEEP (*(SORT_NONE(.fini)))
-  } >isram AT>isram
-  . = ALIGN(16);
+  } >isram AT>isram 
+
+  . = ALIGN(4);
+
   PROVIDE (__etext = .);
   PROVIDE (_etext = .);
   PROVIDE (etext = .);
+  PROVIDE( _eisram = . );
 
-  .preinit_array :
+
+  .preinit_array  :
   {
     PROVIDE_HIDDEN (__preinit_array_start = .);
     KEEP (*(.preinit_array))
     PROVIDE_HIDDEN (__preinit_array_end = .);
-  } >isram AT>isram
-  .init_array :
+  } >isram AT>isram 
+
+  .init_array     :
   {
     PROVIDE_HIDDEN (__init_array_start = .);
     KEEP (*(SORT_BY_INIT_PRIORITY(.init_array.*) SORT_BY_INIT_PRIORITY(.ctors.*)))
     KEEP (*(.init_array EXCLUDE_FILE (*crtbegin.o *crtbegin?.o *crtend.o *crtend?.o ) .ctors))
     PROVIDE_HIDDEN (__init_array_end = .);
-  } >isram AT>isram
-  .fini_array :
+  } >isram AT>isram 
+
+  .fini_array     :
   {
     PROVIDE_HIDDEN (__fini_array_start = .);
     KEEP (*(SORT_BY_INIT_PRIORITY(.fini_array.*) SORT_BY_INIT_PRIORITY(.dtors.*)))
     KEEP (*(.fini_array EXCLUDE_FILE (*crtbegin.o *crtbegin?.o *crtend.o *crtend?.o ) .dtors))
     PROVIDE_HIDDEN (__fini_array_end = .);
-  } >isram AT>isram
-  .ctors :
+  } >isram AT>isram 
+
+  .ctors          :
   {
+    /* gcc uses crtbegin.o to find the start of
+       the constructors, so we make sure it is
+       first.  Because this is a wildcard, it
+       doesn't matter if the user does not
+       actually link against crtbegin.o; the
+       linker won't look for a file to match a
+       wildcard.  The wildcard also means that it
+       doesn't matter which directory crtbegin.o
+       is in.  */
     KEEP (*crtbegin.o(.ctors))
     KEEP (*crtbegin?.o(.ctors))
+    /* We don't want to include the .ctor section from
+       the crtend.o file until after the sorted ctors.
+       The .ctor section from the crtend file contains the
+       end of ctors marker and it must be last */
     KEEP (*(EXCLUDE_FILE (*crtend.o *crtend?.o ) .ctors))
     KEEP (*(SORT(.ctors.*)))
     KEEP (*(.ctors))
-  } >isram AT>isram
-  .dtors :
+  } >isram AT>isram 
+
+  .dtors          :
   {
     KEEP (*crtbegin.o(.dtors))
     KEEP (*crtbegin?.o(.dtors))
     KEEP (*(EXCLUDE_FILE (*crtend.o *crtend?.o ) .dtors))
     KEEP (*(SORT(.dtors.*)))
     KEEP (*(.dtors))
-  } >isram AT>isram
+  } >isram AT>isram 
 
-  . = ALIGN(16);
-  .ex_table_base :
+    . = ALIGN(4);
+    PROVIDE( _eisram = . );
+
+  .lalign         :
   {
-	  _ex_table_base_start = .;
-	  . = 0x500;
-	  _ex_table_base_end = .;
-  } >isram AT>isram
-
-  . = ALIGN(16);
-  PROVIDE( _eisram = . );
-
-  .lalign :
-  {
-    . = ALIGN(16);
+    . = ALIGN(4);
     PROVIDE( _data_lma = . );
-  } >isram AT>isram
-  .dalign :
+  } >isram AT>isram 
+
+  .dalign         :
   {
-    . = ALIGN(16);
+    . = ALIGN(4);
     PROVIDE( _data = . );
-  } >dsram AT>isram
-  .data :
+  } >dsram AT>isram 
+
+  .data          :
   {
     *(.rdata)
     *(.rodata .rodata.*)
@@ -105,22 +127,25 @@ SECTIONS
     *(.gnu.linkonce.r.*)
     *(.data .data.*)
     *(.gnu.linkonce.d.*)
-    . = ALIGN(16);
+    . = ALIGN(8);
     PROVIDE( __global_pointer$ = . + 0x800 );
     *(.sdata .sdata.*)
     *(.gnu.linkonce.s.*)
-    . = ALIGN(16);
+    . = ALIGN(8);
     *(.srodata.cst16)
     *(.srodata.cst8)
     *(.srodata.cst4)
     *(.srodata.cst2)
     *(.srodata .srodata.*)
-  } >dsram AT>isram
-  . = ALIGN(16);
+  } >dsram AT>isram 
+
+  . = ALIGN(4);
   PROVIDE( _edata = . );
   PROVIDE( edata = . );
+
   PROVIDE( _fbss = . );
-  .bss :
+  
+  .bss            :
   {
     PROVIDE( __bss_start = . );
     *(.sbss*)
@@ -128,18 +153,17 @@ SECTIONS
     *(.bss .bss.*)
     *(.gnu.linkonce.b.*)
     *(COMMON)
-    . = ALIGN(16);
-  } >dsram AT>dsram
-  . = ALIGN(16);
+    . = ALIGN(4);
+  } >dsram AT>dsram 
+
+  . = ALIGN(8);
   PROVIDE( _end = . );
   PROVIDE( end = . );
-  PROVIDE (__heap_start = _end);
+
   .stack ORIGIN(dsram) + LENGTH(dsram) - __stack_size :
   {
     PROVIDE( _heap_end = . );
-    PROVIDE (__heap_end = _heap_end);
-    PROVIDE (__heap_size = __heap_end - __heap_start);
-    . = __stack_size;
+    . = __stack_size - 4;
     PROVIDE( _stack = . );
-  } >dsram AT>dsram
+  } >dsram AT>dsram 
 }
