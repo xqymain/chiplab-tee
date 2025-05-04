@@ -366,7 +366,6 @@ else begin: ddr3_tb
         wait(`MIG_AXI.init_calib_complete);
         write_file(32'h1c000000,"../../../../../inst_data.bin");
         force u_soc_top.ddr_data_init = 1'b1;
-        release u_soc_top.ddr_data_init;
     end
 
     ddr3_model	u_ddr3_model (	

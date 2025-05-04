@@ -80,6 +80,10 @@ module axi_wrap_ram(
   //from confreg
   input  [4 :0] ram_random_mask
 );
+
+//延迟倍数
+localparam Delay_Multiple     = 10;
+
 wire axi_arvalid_m_masked;
 wire axi_rready_m_masked;
 wire axi_awvalid_m_masked;
@@ -104,6 +108,8 @@ reg [4:0] pf_r2r;
 reg [1:0] pf_b2b;
 wire pf_r2r_nomask= pf_r2r==5'd0;
 wire pf_b2b_nomask= pf_b2b==2'd0;
+reg pf_r_and;
+reg pf_b_and;
 
 //mask
 `ifdef RUN_PERF_TEST
@@ -114,8 +120,8 @@ wire pf_b2b_nomask= pf_b2b==2'd0;
         assign  r_and = 1'b1;
         assign  b_and = 1'b1;
     `else
-        assign  r_and = pf_r2r_nomask;
-        assign  b_and = pf_b2b_nomask;
+        assign  r_and = pf_r_and;
+        assign  b_and = pf_b_and;
     `endif
 `else
     assign ar_and = ram_random_mask[4] | ar_nomask;
@@ -146,6 +152,331 @@ begin
                  axi_awvalid_m_masked&&axi_awready ? 2'd3 :
                  !pf_b2b_nomask       ? pf_b2b-1'b1 : pf_b2b;
 end
+
+/*********************************************************************************************/
+//R通道延迟展宽 Delay_Multiple 倍
+
+localparam S_R_IDLE           = 3'h0; //空闲
+localparam S_WAIT_R           = 3'h1; //等待自己的R从slave返回
+localparam S_WAIT_LAST_R      = 3'h2; //等待上一个AR的R给到master
+localparam S_DELAY_R          = 3'h3; //等到计数器到达目标值再将R发给master
+
+
+reg [2:0] rstate [3:0];
+reg [2:0] next_rstate [3:0];
+
+wire [3:0] state_ridle;
+wire [3:0] state_wait_r;
+wire [3:0] state_wait_lastr;
+wire [3:0] state_delay_r;
+
+//find state first one
+wire [3:0] state_ridle_one;
+wire [3:0] state_wait_lastr_one;
+
+first_one_4_4 u_sel_ridle (.in(state_ridle), .out(state_ridle_one));
+first_one_4_4 u_sel_wait_lastr (.in(state_wait_lastr), .out(state_wait_lastr_one));
+
+reg [31:0] r_countcmp;
+reg [31:0] r_count [3:0];
+
+genvar i;
+generate 
+for(i=0; i<4;i=i+1) begin
+    assign state_ridle[i]           = (rstate[i] == S_R_IDLE        );
+    assign state_wait_r[i]          = (rstate[i] == S_WAIT_R        );
+    assign state_wait_lastr[i]      = (rstate[i] == S_WAIT_LAST_R   );
+    assign state_delay_r[i]         = (rstate[i] == S_DELAY_R       );
+
+    always @(posedge aclk or negedge aresetn) begin
+        if(~aresetn)
+            rstate[i] <= S_R_IDLE;
+        else begin
+            rstate[i] <= next_rstate[i];
+        end
+    end
+
+    //状态跳转控制
+    always @(*) begin
+        case(rstate[i])
+            S_R_IDLE : begin
+                if(state_ridle_one[i] & axi_arvalid_m_masked & axi_arready)begin
+                    if(&state_ridle)
+                        next_rstate[i] = S_WAIT_R;
+                    else
+                        next_rstate[i] = S_WAIT_LAST_R;
+                end
+                else
+                    next_rstate[i] = S_R_IDLE;
+            end
+            S_WAIT_R : begin
+                if(axi_rvalid_s_unmasked)
+                    next_rstate[i] = S_DELAY_R;
+                else
+                    next_rstate[i] = S_WAIT_R;
+            end
+            S_WAIT_LAST_R : begin
+                if(state_wait_lastr_one[i] & axi_rvalid & axi_rready & axi_rlast)
+                    next_rstate[i] = S_DELAY_R;
+                else
+                    next_rstate[i] = S_WAIT_LAST_R;
+            end
+            S_DELAY_R : begin
+                if((r_count[i] >= r_countcmp) & axi_rvalid & axi_rready & axi_rlast)
+                    next_rstate[i] = S_R_IDLE;
+                else
+                    next_rstate[i] = S_DELAY_R;
+            end
+            default     :begin
+                next_rstate[i] = S_R_IDLE;
+            end
+        endcase
+    end
+
+    always @(posedge aclk or negedge aresetn) begin
+        if(~aresetn)begin
+            r_count[i] <= 32'h0;
+        end
+        else begin
+            if(state_wait_r[i] | state_delay_r[i])
+                r_count[i] <= r_count[i] + 1'b1;
+            else
+                r_count[i] <= 32'h0;
+        end
+    end
+
+end
+endgenerate
+
+always @(posedge aclk or negedge aresetn) begin
+    if(~aresetn) begin
+        r_countcmp <= 32'h0;
+    end
+    else begin
+        case(state_wait_r)
+            4'b0001: begin
+                if(axi_rvalid_s_unmasked)
+                    r_countcmp <= r_count[0] * Delay_Multiple;
+            end
+            4'b0010: begin
+                if(axi_rvalid_s_unmasked)
+                    r_countcmp <= r_count[1] * Delay_Multiple;
+            end
+            4'b0100: begin
+                if(axi_rvalid_s_unmasked)
+                    r_countcmp <= r_count[2] * Delay_Multiple;
+            end
+            4'b1000: begin
+                if(axi_rvalid_s_unmasked)
+                    r_countcmp <= r_count[3] * Delay_Multiple;
+            end
+            default: begin
+                    r_countcmp <= r_countcmp;
+            end
+        endcase
+    end
+end
+
+always @(posedge aclk or negedge aresetn) begin
+    if(~aresetn) begin
+        pf_r_and <= 1'b0;
+    end
+    else begin
+        case (state_delay_r)
+            4'b0001: begin
+                if((r_count[0] >= r_countcmp) & (~(axi_rvalid & axi_rready & axi_rlast)))
+                    pf_r_and <= 1'b1;
+                else
+                    pf_r_and <= 1'b0;
+            end
+            4'b0010: begin
+                if((r_count[1] >= r_countcmp) & (~(axi_rvalid & axi_rready & axi_rlast)))
+                    pf_r_and <= 1'b1;
+                else
+                    pf_r_and <= 1'b0;
+            end
+            4'b0100: begin
+                if((r_count[2] >= r_countcmp) & (~(axi_rvalid & axi_rready & axi_rlast)))
+                    pf_r_and <= 1'b1;
+                else
+                    pf_r_and <= 1'b0;
+            end
+            4'b1000: begin
+                if((r_count[3] >= r_countcmp) & (~(axi_rvalid & axi_rready & axi_rlast)))
+                    pf_r_and <= 1'b1;
+                else
+                    pf_r_and <= 1'b0;
+            end
+            default: begin
+                    pf_r_and <= 1'b0;
+            end
+        endcase
+    end
+end
+
+/*********************************************************************************************/
+
+/*********************************************************************************************/
+//B通道延迟展宽 Delay_Multiple 倍
+
+localparam S_B_IDLE           = 3'h0; //空闲
+localparam S_WAIT_B           = 3'h1; //等待自己的B从slave返回
+localparam S_WAIT_LAST_B      = 3'h2; //等待上一个W的B给到master
+localparam S_DELAY_B          = 3'h3; //等到计数器到达目标值再将B发给master
+
+reg [2:0] bstate [3:0];
+reg [2:0] next_bstate [3:0];
+
+wire [3:0] state_bidle;
+wire [3:0] state_wait_b;
+wire [3:0] state_wait_lastb;
+wire [3:0] state_delay_b;
+
+//find state first one
+wire [3:0] state_bidle_one;
+wire [3:0] state_wait_lastb_one;
+
+first_one_4_4 u_sel_bidle (.in(state_bidle), .out(state_bidle_one));
+first_one_4_4 u_sel_wait_lastb (.in(state_wait_lastb), .out(state_wait_lastb_one));
+
+reg [31:0] b_countcmp;
+reg [31:0] b_count [3:0];
+
+genvar j;
+generate 
+for(j=0; j<4;j=j+1) begin
+    assign state_bidle[j]           = (bstate[j] == S_B_IDLE        );
+    assign state_wait_b[j]          = (bstate[j] == S_WAIT_B        );
+    assign state_wait_lastb[j]      = (bstate[j] == S_WAIT_LAST_B   );
+    assign state_delay_b[j]         = (bstate[j] == S_DELAY_B       );
+
+    always @(posedge aclk or negedge aresetn) begin
+        if(~aresetn)
+            bstate[j] <= S_B_IDLE;
+        else begin
+            bstate[j] <= next_bstate[j];
+        end
+    end
+
+    //状态跳转控制
+    always @(*) begin
+        case(bstate[j])
+            S_B_IDLE : begin
+                if(state_bidle_one[j] & axi_wvalid_m_masked & axi_wready & axi_wlast)begin
+                    if(&state_bidle)
+                        next_bstate[j] = S_WAIT_B;
+                    else
+                        next_bstate[j] = S_WAIT_LAST_B;
+                end
+                else
+                    next_bstate[j] = S_B_IDLE;
+            end
+            S_WAIT_B : begin
+                if(axi_bvalid_s_unmasked)
+                    next_bstate[j] = S_DELAY_B;
+                else
+                    next_bstate[j] = S_WAIT_B;
+            end
+            S_WAIT_LAST_B : begin
+                if(state_wait_lastb_one[j] & axi_bvalid & axi_bready)
+                    next_bstate[j] = S_DELAY_B;
+                else
+                    next_bstate[j] = S_WAIT_LAST_B;
+            end
+            S_DELAY_B : begin
+                if((b_count[j] >= b_countcmp) & axi_bvalid & axi_bready)
+                    next_bstate[j] = S_B_IDLE;
+                else
+                    next_bstate[j] = S_DELAY_B;
+            end
+            default     :begin
+                next_bstate[j] = S_B_IDLE;
+            end
+        endcase
+    end
+
+    always @(posedge aclk or negedge aresetn) begin
+        if(~aresetn)begin
+            b_count[j] <= 32'h0;
+        end
+        else begin
+            if(state_wait_b[j] | state_delay_b[j])
+                b_count[j] <= b_count[j] + 1'b1;
+            else
+                b_count[j] <= 32'h0;
+        end
+    end
+
+end
+endgenerate
+
+always @(posedge aclk or negedge aresetn) begin
+    if(~aresetn) begin
+        b_countcmp <= 32'h0;
+    end
+    else begin
+        case(state_wait_b)
+            4'b0001: begin
+                if(axi_bvalid_s_unmasked)
+                    b_countcmp <= b_count[0] * Delay_Multiple;
+            end
+            4'b0010: begin
+                if(axi_bvalid_s_unmasked)
+                    b_countcmp <= b_count[1] * Delay_Multiple;
+            end
+            4'b0100: begin
+                if(axi_bvalid_s_unmasked)
+                    b_countcmp <= b_count[2] * Delay_Multiple;
+            end
+            4'b1000: begin
+                if(axi_bvalid_s_unmasked)
+                    b_countcmp <= b_count[3] * Delay_Multiple;
+            end
+            default: begin
+                    b_countcmp <= b_countcmp;
+            end
+        endcase
+    end
+end
+
+always @(posedge aclk or negedge aresetn) begin
+    if(~aresetn) begin
+        pf_b_and <= 1'b0;
+    end
+    else begin
+        case (state_delay_b)
+            4'b0001: begin
+                if((b_count[0] >= b_countcmp) & (~(axi_bvalid & axi_bready)))
+                    pf_b_and <= 1'b1;
+                else
+                    pf_b_and <= 1'b0;
+            end
+            4'b0010: begin
+                if((b_count[1] >= b_countcmp) & (~(axi_bvalid & axi_bready)))
+                    pf_b_and <= 1'b1;
+                else
+                    pf_b_and <= 1'b0;
+            end
+            4'b0100: begin
+                if((b_count[2] >= b_countcmp) & (~(axi_bvalid & axi_bready)))
+                    pf_b_and <= 1'b1;
+                else
+                    pf_b_and <= 1'b0;
+            end
+            4'b1000: begin
+                if((b_count[3] >= b_countcmp) & (~(axi_bvalid & axi_bready)))
+                    pf_b_and <= 1'b1;
+                else
+                    pf_b_and <= 1'b0;
+            end
+            default: begin
+                    pf_b_and <= 1'b0;
+            end
+        endcase
+    end
+end
+
+/*********************************************************************************************/
 
 
 //-----{master -> slave}-----
@@ -204,49 +535,6 @@ wire [3 :0] ram_bid    ;
 wire [1 :0] ram_bresp  ;
 wire        ram_bvalid ;
 wire        ram_bready ;
-
-/*
-// inst ram axi
-axi_ram ram(
-    .s_aclk         (aclk         ),
-    .s_aresetn      (aresetn      ),
-
-    //ar
-    .s_axi_arid     (ram_arid     ),
-    .s_axi_araddr   (ram_araddr   ),
-    .s_axi_arlen    (ram_arlen    ),
-    .s_axi_arsize   (ram_arsize   ),
-    .s_axi_arburst  (ram_arburst  ),
-    .s_axi_arvalid  (ram_arvalid  ),
-    .s_axi_arready  (ram_arready  ),
-    //r
-    .s_axi_rid      (ram_rid      ),
-    .s_axi_rdata    (ram_rdata    ),
-    .s_axi_rresp    (ram_rresp    ),
-    .s_axi_rlast    (ram_rlast    ),
-    .s_axi_rvalid   (ram_rvalid   ),
-    .s_axi_rready   (ram_rready   ),
-    //aw
-    .s_axi_awid     (ram_awid     ),
-    .s_axi_awaddr   (ram_awaddr   ),
-    .s_axi_awlen    (ram_awlen    ),
-    .s_axi_awsize   (ram_awsize   ),
-    .s_axi_awburst  (ram_awburst  ),
-    .s_axi_awvalid  (ram_awvalid  ),
-    .s_axi_awready  (ram_awready  ),
-    //w
-    .s_axi_wdata    (ram_wdata    ),
-    .s_axi_wstrb    (ram_wstrb    ),
-    .s_axi_wlast    (ram_wlast    ),
-    .s_axi_wvalid   (ram_wvalid   ),
-    .s_axi_wready   (ram_wready   ),
-    //b
-    .s_axi_bid      (ram_bid      ),
-    .s_axi_bresp    (ram_bresp    ),
-    .s_axi_bvalid   (ram_bvalid   ),
-    .s_axi_bready   (ram_bready   )
-);
-*/
 
 wire  [31:0]    fpga_sram_raddr;
 wire  [31:0]    fpga_sram_rdata;
