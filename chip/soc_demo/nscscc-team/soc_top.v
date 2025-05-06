@@ -126,12 +126,12 @@ generate if(SIMULATION && `SIMU_USE_PLL==0) begin: sim_clk
     assign ddr_clk_ref = clk_200m;
     rst_sync u_rst_sys(
         .clk(sys_clk),
-        .rst_n_in(resetn),
+        .rst_n_in(resetn & ddr_data_init),
         .rst_n_out(sys_resetn)
     );
     rst_sync u_rst_cpu(
         .clk(cpu_clk),
-        .rst_n_in(resetn & ddr_data_init),
+        .rst_n_in(sys_resetn),
         .rst_n_out(cpu_resetn)
     );
     assign jtag_axi_resetn = 1'b0;
@@ -148,12 +148,12 @@ else if(SIMULATION && `SIMU_USE_PLL==1) begin: sim_pll_clk
     );
     rst_sync u_rst_sys(
         .clk(sys_clk),
-        .rst_n_in(pll_locked),
+        .rst_n_in(pll_locked & ddr_data_init),
         .rst_n_out(sys_resetn)
     );
     rst_sync u_rst_cpu(
         .clk(cpu_clk),
-        .rst_n_in(pll_locked & ddr_data_init),
+        .rst_n_in(sys_resetn),
         .rst_n_out(cpu_resetn)
     );
     assign jtag_axi_resetn = 1'b0;

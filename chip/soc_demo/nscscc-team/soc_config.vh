@@ -15,4 +15,4 @@
 //   at this time, frequency of cpu_clk is 91MHz.
 `define SIMU_USE_PLL 0 //set 0 to speed up simulation
 
-`define SIMU_USE_DDR 1 //set 0 to speed up simulation
+`define SIMU_USE_DDR 0 //set 0 to speed up simulation

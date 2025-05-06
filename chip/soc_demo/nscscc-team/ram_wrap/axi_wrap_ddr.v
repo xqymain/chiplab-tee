@@ -276,19 +276,19 @@ always @(posedge aclk or negedge aresetn) begin
         case(state_wait_r)
             4'b0001: begin
                 if(axi_rvalid_s_unmasked)
-                    r_countcmp <= r_count[0] * Delay_Multiple;
+                    r_countcmp <= (r_count[0]+1'b1) * Delay_Multiple;
             end
             4'b0010: begin
                 if(axi_rvalid_s_unmasked)
-                    r_countcmp <= r_count[1] * Delay_Multiple;
+                    r_countcmp <= (r_count[1]+1'b1) * Delay_Multiple;
             end
             4'b0100: begin
                 if(axi_rvalid_s_unmasked)
-                    r_countcmp <= r_count[2] * Delay_Multiple;
+                    r_countcmp <= (r_count[2]+1'b1) * Delay_Multiple;
             end
             4'b1000: begin
                 if(axi_rvalid_s_unmasked)
-                    r_countcmp <= r_count[3] * Delay_Multiple;
+                    r_countcmp <= (r_count[3]+1'b1) * Delay_Multiple;
             end
             default: begin
                     r_countcmp <= r_countcmp;
@@ -438,19 +438,19 @@ always @(posedge aclk or negedge aresetn) begin
         case(state_wait_b)
             4'b0001: begin
                 if(axi_bvalid_s_unmasked)
-                    b_countcmp <= b_count[0] * Delay_Multiple;
+                    b_countcmp <= (b_count[0]+1'b1) * Delay_Multiple;
             end
             4'b0010: begin
                 if(axi_bvalid_s_unmasked)
-                    b_countcmp <= b_count[1] * Delay_Multiple;
+                    b_countcmp <= (b_count[1]+1'b1) * Delay_Multiple;
             end
             4'b0100: begin
                 if(axi_bvalid_s_unmasked)
-                    b_countcmp <= b_count[2] * Delay_Multiple;
+                    b_countcmp <= (b_count[2]+1'b1) * Delay_Multiple;
             end
             4'b1000: begin
                 if(axi_bvalid_s_unmasked)
-                    b_countcmp <= b_count[3] * Delay_Multiple;
+                    b_countcmp <= (b_count[3]+1'b1) * Delay_Multiple;
             end
             default: begin
                     b_countcmp <= b_countcmp;

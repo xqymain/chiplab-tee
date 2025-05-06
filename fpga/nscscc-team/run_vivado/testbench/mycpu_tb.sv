@@ -365,6 +365,10 @@ else begin: ddr3_tb
         force u_soc_top.ddr_data_init = 1'b0;
         wait(`MIG_AXI.init_calib_complete);
         write_file(32'h1c000000,"../../../../../inst_data.bin");
+        @(posedge `MIG_AXI.ui_clk);
+        force u_soc_top.ddr3.u_axi_wrap_ddr.u_Axi_CDC.axiOutRst = 1'b0;
+        @(posedge `MIG_AXI.ui_clk);
+        force u_soc_top.ddr3.u_axi_wrap_ddr.u_Axi_CDC.axiOutRst = 1'b1;
         force u_soc_top.ddr_data_init = 1'b1;
     end
 
