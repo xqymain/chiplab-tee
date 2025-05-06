@@ -31,3 +31,5 @@ compile_commands.json
 sims/verilator/.cache/clangd/index/*.*
 inst_data.bin
 .Xil
+*.a
+convert

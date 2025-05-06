@@ -46,20 +46,17 @@ start:
     addi.w    t0, t0, 0x1
     bne       t0, t2, 1b
 #else
-    /* disable   cache */
-    li.w    $r12,0x1
-    csrwr	$r12,0x101
+
 #endif
 
     csrwr	$r0,0x180
     csrwr	$r0,0x181
-    ori	    $r12,$r0,0x19
+    ori	    $r12,$r0,0x09
     csrwr	$r12,0x180
-
     li.w    $r12,0xa0000009
     csrwr	$r12,0x181
-    ori	    $r12,$r0,0x10
 
+    ori	    $r12,$r0,0x10
     ori	    $r13,$r0,0x18
     csrxchg	$r12,$r13,0x0
 
@@ -97,6 +94,11 @@ start:
 	addi.w t0, t0, 4
 	bltu t0, t1, 1b
 2:
+
+#if has_cache==1
+    ori	    $r12,$r0,0x19
+    csrwr	$r12,0x180
+#endif
 
 	la.local	sp, _stack
     

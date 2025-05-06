@@ -120,9 +120,9 @@ SECTIONS
   PROVIDE( _edata = . );
   PROVIDE( edata = . );
   PROVIDE( _fbss = . );
-  PROVIDE( __bss_start = . );
   .bss :
   {
+    PROVIDE( __bss_start = . );
     *(.sbss*)
     *(.gnu.linkonce.sb.*)
     *(.bss .bss.*)
