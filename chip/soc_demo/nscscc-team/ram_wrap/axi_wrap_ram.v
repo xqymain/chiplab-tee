@@ -30,7 +30,7 @@ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF
 THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 --------------------------------------------------------------------------------
 ------------------------------------------------------------------------------*/
-`include "../soc_config.vh"
+`include "soc_config.vh"
 
 module axi_wrap_ram(
   input         aclk,
@@ -82,7 +82,8 @@ module axi_wrap_ram(
 );
 
 //延迟倍数
-localparam Delay_Multiple     = 100;
+localparam R_Delay_Multiple   = 85;  //R通道 延迟170周期
+localparam B_Delay_Multiple   = 30;  //B通道 延迟60周期
 
 wire axi_arvalid_m_masked;
 wire axi_rready_m_masked;
@@ -154,7 +155,7 @@ begin
 end
 
 /*********************************************************************************************/
-//R通道延迟展宽 Delay_Multiple 倍
+//R通道延迟展宽 R_Delay_Multiple 倍
 
 localparam S_R_IDLE           = 3'h0; //空闲
 localparam S_WAIT_R           = 3'h1; //等待自己的R从slave返回
@@ -256,19 +257,19 @@ always @(posedge aclk or negedge aresetn) begin
         case(state_wait_r)
             4'b0001: begin
                 if(axi_rvalid_s_unmasked)
-                    r_countcmp <= (r_count[0]+1'b1) * Delay_Multiple;
+                    r_countcmp <= (r_count[0]+1'b1) * R_Delay_Multiple;
             end
             4'b0010: begin
                 if(axi_rvalid_s_unmasked)
-                    r_countcmp <= (r_count[1]+1'b1) * Delay_Multiple;
+                    r_countcmp <= (r_count[1]+1'b1) * R_Delay_Multiple;
             end
             4'b0100: begin
                 if(axi_rvalid_s_unmasked)
-                    r_countcmp <= (r_count[2]+1'b1) * Delay_Multiple;
+                    r_countcmp <= (r_count[2]+1'b1) * R_Delay_Multiple;
             end
             4'b1000: begin
                 if(axi_rvalid_s_unmasked)
-                    r_countcmp <= (r_count[3]+1'b1) * Delay_Multiple;
+                    r_countcmp <= (r_count[3]+1'b1) * R_Delay_Multiple;
             end
             default: begin
                     r_countcmp <= r_countcmp;
@@ -317,7 +318,7 @@ end
 /*********************************************************************************************/
 
 /*********************************************************************************************/
-//B通道延迟展宽 Delay_Multiple 倍
+//B通道延迟展宽 B_Delay_Multiple 倍
 
 localparam S_B_IDLE           = 3'h0; //空闲
 localparam S_WAIT_B           = 3'h1; //等待自己的B从slave返回
@@ -418,19 +419,19 @@ always @(posedge aclk or negedge aresetn) begin
         case(state_wait_b)
             4'b0001: begin
                 if(axi_bvalid_s_unmasked)
-                    b_countcmp <= (b_count[0]+1'b1) * Delay_Multiple;
+                    b_countcmp <= (b_count[0]+1'b1) * B_Delay_Multiple;
             end
             4'b0010: begin
                 if(axi_bvalid_s_unmasked)
-                    b_countcmp <= (b_count[1]+1'b1) * Delay_Multiple;
+                    b_countcmp <= (b_count[1]+1'b1) * B_Delay_Multiple;
             end
             4'b0100: begin
                 if(axi_bvalid_s_unmasked)
-                    b_countcmp <= (b_count[2]+1'b1) * Delay_Multiple;
+                    b_countcmp <= (b_count[2]+1'b1) * B_Delay_Multiple;
             end
             4'b1000: begin
                 if(axi_bvalid_s_unmasked)
-                    b_countcmp <= (b_count[3]+1'b1) * Delay_Multiple;
+                    b_countcmp <= (b_count[3]+1'b1) * B_Delay_Multiple;
             end
             default: begin
                     b_countcmp <= b_countcmp;

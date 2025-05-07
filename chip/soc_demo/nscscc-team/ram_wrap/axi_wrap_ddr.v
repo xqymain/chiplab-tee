@@ -30,7 +30,7 @@ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF
 THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 --------------------------------------------------------------------------------
 ------------------------------------------------------------------------------*/
-`include "../soc_config.vh"
+`include "soc_config.vh"
 
 module axi_wrap_ddr(
     input         aclk,
@@ -102,7 +102,7 @@ module axi_wrap_ddr(
 );
 
 //延迟倍数
-localparam Delay_Multiple     = 10;
+localparam Delay_Multiple     = 5;
 
 wire axi_arvalid_m_masked;
 wire axi_rready_m_masked;

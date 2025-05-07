@@ -221,83 +221,6 @@ wire [1 :0] cpu_bresp  ;
 wire        cpu_bvalid ;
 wire        cpu_bready ;
 
-//cpu axi wrap
-wire        cpu_wrap_aclk   ;
-wire        cpu_wrap_aresetn;
-wire [3 :0] cpu_wrap_arid   ;
-wire [31:0] cpu_wrap_araddr ;
-wire [3 :0] cpu_wrap_arlen  ;
-wire [2 :0] cpu_wrap_arsize ;
-wire [1 :0] cpu_wrap_arburst;
-wire [1 :0] cpu_wrap_arlock ;
-wire [3 :0] cpu_wrap_arcache;
-wire [2 :0] cpu_wrap_arprot ;
-wire        cpu_wrap_arvalid;
-wire        cpu_wrap_arready;
-wire [3 :0] cpu_wrap_rid    ;
-wire [31:0] cpu_wrap_rdata  ;
-wire [1 :0] cpu_wrap_rresp  ;
-wire        cpu_wrap_rlast  ;
-wire        cpu_wrap_rvalid ;
-wire        cpu_wrap_rready ;
-wire [3 :0] cpu_wrap_awid   ;
-wire [31:0] cpu_wrap_awaddr ;
-wire [3 :0] cpu_wrap_awlen  ;
-wire [2 :0] cpu_wrap_awsize ;
-wire [1 :0] cpu_wrap_awburst;
-wire [1 :0] cpu_wrap_awlock ;
-wire [3 :0] cpu_wrap_awcache;
-wire [2 :0] cpu_wrap_awprot ;
-wire        cpu_wrap_awvalid;
-wire        cpu_wrap_awready;
-wire [3 :0] cpu_wrap_wid    ;
-wire [31:0] cpu_wrap_wdata  ;
-wire [3 :0] cpu_wrap_wstrb  ;
-wire        cpu_wrap_wlast  ;
-wire        cpu_wrap_wvalid ;
-wire        cpu_wrap_wready ;
-wire [3 :0] cpu_wrap_bid    ;
-wire [1 :0] cpu_wrap_bresp  ;
-wire        cpu_wrap_bvalid ;
-wire        cpu_wrap_bready ;
-//cpu axi sync
-wire [3 :0] cpu_sync_arid   ;
-wire [31:0] cpu_sync_araddr ;
-wire [3 :0] cpu_sync_arlen  ;
-wire [2 :0] cpu_sync_arsize ;
-wire [1 :0] cpu_sync_arburst;
-wire [1 :0] cpu_sync_arlock ;
-wire [3 :0] cpu_sync_arcache;
-wire [2 :0] cpu_sync_arprot ;
-wire        cpu_sync_arvalid;
-wire        cpu_sync_arready;
-wire [3 :0] cpu_sync_rid    ;
-wire [31:0] cpu_sync_rdata  ;
-wire [1 :0] cpu_sync_rresp  ;
-wire        cpu_sync_rlast  ;
-wire        cpu_sync_rvalid ;
-wire        cpu_sync_rready ;
-wire [3 :0] cpu_sync_awid   ;
-wire [31:0] cpu_sync_awaddr ;
-wire [3 :0] cpu_sync_awlen  ;
-wire [2 :0] cpu_sync_awsize ;
-wire [1 :0] cpu_sync_awburst;
-wire [1 :0] cpu_sync_awlock ;
-wire [3 :0] cpu_sync_awcache;
-wire [2 :0] cpu_sync_awprot ;
-wire        cpu_sync_awvalid;
-wire        cpu_sync_awready;
-wire [3 :0] cpu_sync_wid    ;
-wire [31:0] cpu_sync_wdata  ;
-wire [3 :0] cpu_sync_wstrb  ;
-wire        cpu_sync_wlast  ;
-wire        cpu_sync_wvalid ;
-wire        cpu_sync_wready ;
-wire [3 :0] cpu_sync_bid    ;
-wire [1 :0] cpu_sync_bresp  ;
-wire        cpu_sync_bvalid ;
-wire        cpu_sync_bready ;
-
 //cpu axi4
 wire [3 :0] cpu_axi4_arid   ;
 wire [31:0] cpu_axi4_araddr ;
@@ -334,6 +257,44 @@ wire [3 :0] cpu_axi4_bid    ;
 wire [1 :0] cpu_axi4_bresp  ;
 wire        cpu_axi4_bvalid ;
 wire        cpu_axi4_bready ;
+
+//cpu axi sync
+wire [3 :0] cpu_sync_arid   ;
+wire [31:0] cpu_sync_araddr ;
+wire [7 :0] cpu_sync_arlen  ;
+wire [2 :0] cpu_sync_arsize ;
+wire [1 :0] cpu_sync_arburst;
+wire        cpu_sync_arlock ;
+wire [3 :0] cpu_sync_arcache;
+wire [2 :0] cpu_sync_arprot ;
+wire        cpu_sync_arvalid;
+wire        cpu_sync_arready;
+wire [3 :0] cpu_sync_rid    ;
+wire [31:0] cpu_sync_rdata  ;
+wire [1 :0] cpu_sync_rresp  ;
+wire        cpu_sync_rlast  ;
+wire        cpu_sync_rvalid ;
+wire        cpu_sync_rready ;
+wire [3 :0] cpu_sync_awid   ;
+wire [31:0] cpu_sync_awaddr ;
+wire [7 :0] cpu_sync_awlen  ;
+wire [2 :0] cpu_sync_awsize ;
+wire [1 :0] cpu_sync_awburst;
+wire        cpu_sync_awlock ;
+wire [3 :0] cpu_sync_awcache;
+wire [2 :0] cpu_sync_awprot ;
+wire        cpu_sync_awvalid;
+wire        cpu_sync_awready;
+wire [3 :0] cpu_sync_wid    ;
+wire [31:0] cpu_sync_wdata  ;
+wire [3 :0] cpu_sync_wstrb  ;
+wire        cpu_sync_wlast  ;
+wire        cpu_sync_wvalid ;
+wire        cpu_sync_wready ;
+wire [3 :0] cpu_sync_bid    ;
+wire [1 :0] cpu_sync_bresp  ;
+wire        cpu_sync_bvalid ;
+wire        cpu_sync_bready ;
 
 //axi ram
 wire [3 :0] ram_arid   ;
@@ -583,214 +544,39 @@ core_top u_cpu(
     .debug0_wb_rf_wdata (debug_wb_rf_wdata  )
 );
 
-//cpu axi wrap
-axi_wrap u_cpu_axi_wrap(
-  .m_aclk    ( cpu_clk     ),
-  .m_aresetn ( cpu_resetn  ),
-  //ar
-  .m_arid    ( cpu_arid    ),
-  .m_araddr  ( cpu_araddr  ),
-  .m_arlen   ( cpu_arlen   ),
-  .m_arsize  ( cpu_arsize  ),
-  .m_arburst ( cpu_arburst ),
-  .m_arlock  ( cpu_arlock  ),
-  .m_arcache ( cpu_arcache ),
-  .m_arprot  ( cpu_arprot  ),
-  .m_arvalid ( cpu_arvalid ),
-  .m_arready ( cpu_arready ),
-  //r
-  .m_rid     ( cpu_rid     ),
-  .m_rdata   ( cpu_rdata   ),
-  .m_rresp   ( cpu_rresp   ),
-  .m_rlast   ( cpu_rlast   ),
-  .m_rvalid  ( cpu_rvalid  ),
-  .m_rready  ( cpu_rready  ),
-  //aw
-  .m_awid    ( cpu_awid    ),
-  .m_awaddr  ( cpu_awaddr  ),
-  .m_awlen   ( cpu_awlen   ),
-  .m_awsize  ( cpu_awsize  ),
-  .m_awburst ( cpu_awburst ),
-  .m_awlock  ( cpu_awlock  ),
-  .m_awcache ( cpu_awcache ),
-  .m_awprot  ( cpu_awprot  ),
-  .m_awvalid ( cpu_awvalid ),
-  .m_awready ( cpu_awready ),
-  //w
-  .m_wid     ( cpu_wid     ),
-  .m_wdata   ( cpu_wdata   ),
-  .m_wstrb   ( cpu_wstrb   ),
-  .m_wlast   ( cpu_wlast   ),
-  .m_wvalid  ( cpu_wvalid  ),
-  .m_wready  ( cpu_wready  ),
-  //b
-  .m_bid     ( cpu_bid     ),
-  .m_bresp   ( cpu_bresp   ),
-  .m_bvalid  ( cpu_bvalid  ),
-  .m_bready  ( cpu_bready  ),
-
-  .s_aclk    ( cpu_wrap_aclk    ),
-  .s_aresetn ( cpu_wrap_aresetn ),
-  //ar
-  .s_arid    ( cpu_wrap_arid    ),
-  .s_araddr  ( cpu_wrap_araddr  ),
-  .s_arlen   ( cpu_wrap_arlen   ),
-  .s_arsize  ( cpu_wrap_arsize  ),
-  .s_arburst ( cpu_wrap_arburst ),
-  .s_arlock  ( cpu_wrap_arlock  ),
-  .s_arcache ( cpu_wrap_arcache ),
-  .s_arprot  ( cpu_wrap_arprot  ),
-  .s_arvalid ( cpu_wrap_arvalid ),
-  .s_arready ( cpu_wrap_arready ),
-  //r
-  .s_rid     ( cpu_wrap_rid     ),
-  .s_rdata   ( cpu_wrap_rdata   ),
-  .s_rresp   ( cpu_wrap_rresp   ),
-  .s_rlast   ( cpu_wrap_rlast   ),
-  .s_rvalid  ( cpu_wrap_rvalid  ),
-  .s_rready  ( cpu_wrap_rready  ),
-  //aw
-  .s_awid    ( cpu_wrap_awid    ),
-  .s_awaddr  ( cpu_wrap_awaddr  ),
-  .s_awlen   ( cpu_wrap_awlen   ),
-  .s_awsize  ( cpu_wrap_awsize  ),
-  .s_awburst ( cpu_wrap_awburst ),
-  .s_awlock  ( cpu_wrap_awlock  ),
-  .s_awcache ( cpu_wrap_awcache ),
-  .s_awprot  ( cpu_wrap_awprot  ),
-  .s_awvalid ( cpu_wrap_awvalid ),
-  .s_awready ( cpu_wrap_awready ),
-  //w
-  .s_wid     ( cpu_wrap_wid     ),
-  .s_wdata   ( cpu_wrap_wdata   ),
-  .s_wstrb   ( cpu_wrap_wstrb   ),
-  .s_wlast   ( cpu_wrap_wlast   ),
-  .s_wvalid  ( cpu_wrap_wvalid  ),
-  .s_wready  ( cpu_wrap_wready  ),
-  //b
-  .s_bid     ( cpu_wrap_bid     ),
-  .s_bresp   ( cpu_wrap_bresp   ),
-  .s_bvalid  ( cpu_wrap_bvalid  ),
-  .s_bready  ( cpu_wrap_bready  ) 
-);
-
-//clock sync: from CPU to AXI_Crossbar
-axi_clock_converter  u_axi_clock_sync(
-  .s_axi_aclk    (cpu_clk          ),
-  .s_axi_aresetn (cpu_resetn       ),
-  .s_axi_awid    (cpu_wrap_awid    ),
-  .s_axi_awaddr  (cpu_wrap_awaddr  ),
-  .s_axi_awlen   (cpu_wrap_awlen   ),
-  .s_axi_awsize  (cpu_wrap_awsize  ),
-  .s_axi_awburst (cpu_wrap_awburst ),
-  .s_axi_awlock  (cpu_wrap_awlock  ),
-  .s_axi_awcache (cpu_wrap_awcache ),
-  .s_axi_awprot  (cpu_wrap_awprot  ),
-  .s_axi_awqos   (4'd0             ),
-  .s_axi_awvalid (cpu_wrap_awvalid ),
-  .s_axi_awready (cpu_wrap_awready ),
-  .s_axi_wid     (cpu_wrap_wid     ),
-  .s_axi_wdata   (cpu_wrap_wdata   ),
-  .s_axi_wstrb   (cpu_wrap_wstrb   ),
-  .s_axi_wlast   (cpu_wrap_wlast   ),
-  .s_axi_wvalid  (cpu_wrap_wvalid  ),
-  .s_axi_wready  (cpu_wrap_wready  ),
-  .s_axi_bid     (cpu_wrap_bid     ),
-  .s_axi_bresp   (cpu_wrap_bresp   ),
-  .s_axi_bvalid  (cpu_wrap_bvalid  ),
-  .s_axi_bready  (cpu_wrap_bready  ),
-  .s_axi_arid    (cpu_wrap_arid    ),
-  .s_axi_araddr  (cpu_wrap_araddr  ),
-  .s_axi_arlen   (cpu_wrap_arlen   ),
-  .s_axi_arsize  (cpu_wrap_arsize  ),
-  .s_axi_arburst (cpu_wrap_arburst ),
-  .s_axi_arlock  (cpu_wrap_arlock  ),
-  .s_axi_arcache (cpu_wrap_arcache ),
-  .s_axi_arprot  (cpu_wrap_arprot  ),
-  .s_axi_arqos   (4'd0             ),
-  .s_axi_arvalid (cpu_wrap_arvalid ),
-  .s_axi_arready (cpu_wrap_arready ),
-  .s_axi_rid     (cpu_wrap_rid     ),
-  .s_axi_rdata   (cpu_wrap_rdata   ),
-  .s_axi_rresp   (cpu_wrap_rresp   ),
-  .s_axi_rlast   (cpu_wrap_rlast   ),
-  .s_axi_rvalid  (cpu_wrap_rvalid  ),
-  .s_axi_rready  (cpu_wrap_rready  ),
-  .m_axi_aclk    (sys_clk          ),
-  .m_axi_aresetn (sys_resetn       ),
-  .m_axi_awid    (cpu_sync_awid    ),
-  .m_axi_awaddr  (cpu_sync_awaddr  ),
-  .m_axi_awlen   (cpu_sync_awlen   ),
-  .m_axi_awsize  (cpu_sync_awsize  ),
-  .m_axi_awburst (cpu_sync_awburst ),
-  .m_axi_awlock  (cpu_sync_awlock  ),
-  .m_axi_awcache (cpu_sync_awcache ),
-  .m_axi_awprot  (cpu_sync_awprot  ),
-  .m_axi_awqos   (                 ),
-  .m_axi_awvalid (cpu_sync_awvalid ),
-  .m_axi_awready (cpu_sync_awready ),
-  .m_axi_wid     (cpu_sync_wid     ),
-  .m_axi_wdata   (cpu_sync_wdata   ),
-  .m_axi_wstrb   (cpu_sync_wstrb   ),
-  .m_axi_wlast   (cpu_sync_wlast   ),
-  .m_axi_wvalid  (cpu_sync_wvalid  ),
-  .m_axi_wready  (cpu_sync_wready  ),
-  .m_axi_bid     (cpu_sync_bid     ),
-  .m_axi_bresp   (cpu_sync_bresp   ),
-  .m_axi_bvalid  (cpu_sync_bvalid  ),
-  .m_axi_bready  (cpu_sync_bready  ),
-  .m_axi_arid    (cpu_sync_arid    ),
-  .m_axi_araddr  (cpu_sync_araddr  ),
-  .m_axi_arlen   (cpu_sync_arlen   ), 
-  .m_axi_arsize  (cpu_sync_arsize  ),
-  .m_axi_arburst (cpu_sync_arburst ),
-  .m_axi_arlock  (cpu_sync_arlock  ),
-  .m_axi_arcache (cpu_sync_arcache ),
-  .m_axi_arprot  (cpu_sync_arprot  ),
-  .m_axi_arqos   (                 ),
-  .m_axi_arvalid (cpu_sync_arvalid ),
-  .m_axi_arready (cpu_sync_arready ),
-  .m_axi_rid     (cpu_sync_rid     ),
-  .m_axi_rdata   (cpu_sync_rdata   ),
-  .m_axi_rresp   (cpu_sync_rresp   ),
-  .m_axi_rlast   (cpu_sync_rlast   ),
-  .m_axi_rvalid  (cpu_sync_rvalid  ),
-  .m_axi_rready  (cpu_sync_rready  ) 
-);
-
 axi3_to_axi4_bridge #(
     .ADDR_WIDTH         ( 32 ),
     .DATA_WIDTH         ( 32 ),
     .ID_WIDTH           ( 4  ),
     .W_Burst_Length_MAX ( 16 ))
  u_axi3_to_axi4_bridge (
-    .clk                     ( sys_clk            ),
-    .rst_n                   ( sys_resetn         ),
-    .s_axi3_awid             ( cpu_sync_awid      ),
-    .s_axi3_awaddr           ( cpu_sync_awaddr    ),
-    .s_axi3_awlen            ( cpu_sync_awlen     ),
-    .s_axi3_awsize           ( cpu_sync_awsize    ),
-    .s_axi3_awburst          ( cpu_sync_awburst   ),
-    .s_axi3_awlock           ( cpu_sync_awlock    ),
-    .s_axi3_awcache          ( cpu_sync_awcache   ),
-    .s_axi3_awprot           ( cpu_sync_awprot    ),
-    .s_axi3_awvalid          ( cpu_sync_awvalid   ),
-    .s_axi3_wid              ( cpu_sync_wid       ),
-    .s_axi3_wdata            ( cpu_sync_wdata     ),
-    .s_axi3_wstrb            ( cpu_sync_wstrb     ),
-    .s_axi3_wlast            ( cpu_sync_wlast     ),
-    .s_axi3_wvalid           ( cpu_sync_wvalid    ),
-    .s_axi3_bready           ( cpu_sync_bready    ),
-    .s_axi3_arid             ( cpu_sync_arid      ),
-    .s_axi3_araddr           ( cpu_sync_araddr    ),
-    .s_axi3_arlen            ( cpu_sync_arlen     ),
-    .s_axi3_arsize           ( cpu_sync_arsize    ),
-    .s_axi3_arburst          ( cpu_sync_arburst   ),
-    .s_axi3_arlock           ( cpu_sync_arlock    ),
-    .s_axi3_arcache          ( cpu_sync_arcache   ),
-    .s_axi3_arprot           ( cpu_sync_arprot    ),
-    .s_axi3_arvalid          ( cpu_sync_arvalid   ),
-    .s_axi3_rready           ( cpu_sync_rready    ),
+    .clk                     ( cpu_clk            ),
+    .rst_n                   ( cpu_resetn         ),
+    .s_axi3_awid             ( cpu_awid           ),
+    .s_axi3_awaddr           ( cpu_awaddr         ),
+    .s_axi3_awlen            ( cpu_awlen          ),
+    .s_axi3_awsize           ( cpu_awsize         ),
+    .s_axi3_awburst          ( cpu_awburst        ),
+    .s_axi3_awlock           ( cpu_awlock         ),
+    .s_axi3_awcache          ( cpu_awcache        ),
+    .s_axi3_awprot           ( cpu_awprot         ),
+    .s_axi3_awvalid          ( cpu_awvalid        ),
+    .s_axi3_wid              ( cpu_wid            ),
+    .s_axi3_wdata            ( cpu_wdata          ),
+    .s_axi3_wstrb            ( cpu_wstrb          ),
+    .s_axi3_wlast            ( cpu_wlast          ),
+    .s_axi3_wvalid           ( cpu_wvalid         ),
+    .s_axi3_bready           ( cpu_bready         ),
+    .s_axi3_arid             ( cpu_arid           ),
+    .s_axi3_araddr           ( cpu_araddr         ),
+    .s_axi3_arlen            ( cpu_arlen          ),
+    .s_axi3_arsize           ( cpu_arsize         ),
+    .s_axi3_arburst          ( cpu_arburst        ),
+    .s_axi3_arlock           ( cpu_arlock         ),
+    .s_axi3_arcache          ( cpu_arcache        ),
+    .s_axi3_arprot           ( cpu_arprot         ),
+    .s_axi3_arvalid          ( cpu_arvalid        ),
+    .s_axi3_rready           ( cpu_rready         ),
     .m_axi4_awready          ( cpu_axi4_awready   ),
     .m_axi4_wready           ( cpu_axi4_wready    ),
     .m_axi4_bid              ( cpu_axi4_bid       ),
@@ -803,17 +589,17 @@ axi3_to_axi4_bridge #(
     .m_axi4_rlast            ( cpu_axi4_rlast     ),
     .m_axi4_rvalid           ( cpu_axi4_rvalid    ),
 
-    .s_axi3_awready          ( cpu_sync_awready   ),
-    .s_axi3_wready           ( cpu_sync_wready    ),
-    .s_axi3_bid              ( cpu_sync_bid       ),
-    .s_axi3_bresp            ( cpu_sync_bresp     ),
-    .s_axi3_bvalid           ( cpu_sync_bvalid    ),
-    .s_axi3_arready          ( cpu_sync_arready   ),
-    .s_axi3_rid              ( cpu_sync_rid       ),
-    .s_axi3_rdata            ( cpu_sync_rdata     ),
-    .s_axi3_rresp            ( cpu_sync_rresp     ),
-    .s_axi3_rlast            ( cpu_sync_rlast     ),
-    .s_axi3_rvalid           ( cpu_sync_rvalid    ),
+    .s_axi3_awready          ( cpu_awready        ),
+    .s_axi3_wready           ( cpu_wready         ),
+    .s_axi3_bid              ( cpu_bid            ),
+    .s_axi3_bresp            ( cpu_bresp          ),
+    .s_axi3_bvalid           ( cpu_bvalid         ),
+    .s_axi3_arready          ( cpu_arready        ),
+    .s_axi3_rid              ( cpu_rid            ),
+    .s_axi3_rdata            ( cpu_rdata          ),
+    .s_axi3_rresp            ( cpu_rresp          ),
+    .s_axi3_rlast            ( cpu_rlast          ),
+    .s_axi3_rvalid           ( cpu_rvalid         ),
     .m_axi4_awid             ( cpu_axi4_awid      ),
     .m_axi4_awaddr           ( cpu_axi4_awaddr    ),
     .m_axi4_awlen            ( cpu_axi4_awlen     ),
@@ -838,6 +624,86 @@ axi3_to_axi4_bridge #(
     .m_axi4_arprot           ( cpu_axi4_arprot    ),
     .m_axi4_arvalid          ( cpu_axi4_arvalid   ),
     .m_axi4_rready           ( cpu_axi4_rready    )
+);
+
+//clock sync: from CPU to AXI_Crossbar
+Axi_CDC  u_axi_clock_sync (
+    .axiInClk                ( cpu_clk              ),
+    .axiInRst                ( cpu_resetn           ),
+    .axiOutClk               ( sys_clk              ),
+    .axiOutRst               ( sys_resetn           ),
+
+    .axiIn_awvalid           ( cpu_axi4_awvalid     ),
+    .axiIn_awaddr            ( cpu_axi4_awaddr      ),
+    .axiIn_awid              ( cpu_axi4_awid        ),
+    .axiIn_awlen             ( cpu_axi4_awlen       ),
+    .axiIn_awsize            ( cpu_axi4_awsize      ),
+    .axiIn_awburst           ( cpu_axi4_awburst     ),
+    .axiIn_awlock            ( cpu_axi4_awlock      ),
+    .axiIn_awcache           ( cpu_axi4_awcache     ),
+    .axiIn_awprot            ( cpu_axi4_awprot      ),
+    .axiIn_wvalid            ( cpu_axi4_wvalid      ),
+    .axiIn_wdata             ( cpu_axi4_wdata       ),
+    .axiIn_wstrb             ( cpu_axi4_wstrb       ),
+    .axiIn_wlast             ( cpu_axi4_wlast       ),
+    .axiIn_bready            ( cpu_axi4_bready      ),
+    .axiIn_arvalid           ( cpu_axi4_arvalid     ),
+    .axiIn_araddr            ( cpu_axi4_araddr      ),
+    .axiIn_arid              ( cpu_axi4_arid        ),
+    .axiIn_arlen             ( cpu_axi4_arlen       ),
+    .axiIn_arsize            ( cpu_axi4_arsize      ),
+    .axiIn_arburst           ( cpu_axi4_arburst     ),
+    .axiIn_arlock            ( cpu_axi4_arlock      ),
+    .axiIn_arcache           ( cpu_axi4_arcache     ),
+    .axiIn_arprot            ( cpu_axi4_arprot      ),
+    .axiIn_rready            ( cpu_axi4_rready      ),
+    .axiOut_awready          ( cpu_sync_awready     ),
+    .axiOut_wready           ( cpu_sync_wready      ),
+    .axiOut_bvalid           ( cpu_sync_bvalid      ),
+    .axiOut_bid              ( cpu_sync_bid         ),
+    .axiOut_bresp            ( cpu_sync_bresp       ),
+    .axiOut_arready          ( cpu_sync_arready     ),
+    .axiOut_rvalid           ( cpu_sync_rvalid      ),
+    .axiOut_rdata            ( cpu_sync_rdata       ),
+    .axiOut_rid              ( cpu_sync_rid         ),
+    .axiOut_rresp            ( cpu_sync_rresp       ),
+    .axiOut_rlast            ( cpu_sync_rlast       ),
+
+    .axiIn_awready           ( cpu_axi4_awready     ),
+    .axiIn_wready            ( cpu_axi4_wready      ),
+    .axiIn_bvalid            ( cpu_axi4_bvalid      ),
+    .axiIn_bid               ( cpu_axi4_bid         ),
+    .axiIn_bresp             ( cpu_axi4_bresp       ),
+    .axiIn_arready           ( cpu_axi4_arready     ),
+    .axiIn_rvalid            ( cpu_axi4_rvalid      ),
+    .axiIn_rdata             ( cpu_axi4_rdata       ),
+    .axiIn_rid               ( cpu_axi4_rid         ),
+    .axiIn_rresp             ( cpu_axi4_rresp       ),
+    .axiIn_rlast             ( cpu_axi4_rlast       ),
+    .axiOut_awvalid          ( cpu_sync_awvalid     ),
+    .axiOut_awaddr           ( cpu_sync_awaddr      ),
+    .axiOut_awid             ( cpu_sync_awid        ),
+    .axiOut_awlen            ( cpu_sync_awlen       ),
+    .axiOut_awsize           ( cpu_sync_awsize      ),
+    .axiOut_awburst          ( cpu_sync_awburst     ),
+    .axiOut_awlock           ( cpu_sync_awlock      ),
+    .axiOut_awcache          ( cpu_sync_awcache     ),
+    .axiOut_awprot           ( cpu_sync_awprot      ),
+    .axiOut_wvalid           ( cpu_sync_wvalid      ),
+    .axiOut_wdata            ( cpu_sync_wdata       ),
+    .axiOut_wstrb            ( cpu_sync_wstrb       ),
+    .axiOut_wlast            ( cpu_sync_wlast       ),
+    .axiOut_bready           ( cpu_sync_bready      ),
+    .axiOut_arvalid          ( cpu_sync_arvalid     ),
+    .axiOut_araddr           ( cpu_sync_araddr      ),
+    .axiOut_arid             ( cpu_sync_arid        ),
+    .axiOut_arlen            ( cpu_sync_arlen       ),
+    .axiOut_arsize           ( cpu_sync_arsize      ),
+    .axiOut_arburst          ( cpu_sync_arburst     ),
+    .axiOut_arlock           ( cpu_sync_arlock      ),
+    .axiOut_arcache          ( cpu_sync_arcache     ),
+    .axiOut_arprot           ( cpu_sync_arprot      ),
+    .axiOut_rready           ( cpu_sync_rready      )
 );
 
 jtag_axi_wrap  u_jtag_axi_wrap (
@@ -882,92 +748,47 @@ jtag_axi_wrap  u_jtag_axi_wrap (
     .core_rst_n              ( core_rst_n         )
 );
 
-/*
-uart_debug  u_uart_debug (
-    .clk                     ( sys_clk              ),
-    .rst_n                   ( uart_debug_resetn    ),
-    .arready                 ( uart_debug_arready   ),
-    .rid                     ( uart_debug_rid       ),
-    .rdata                   ( uart_debug_rdata     ),
-    .rresp                   ( uart_debug_rresp     ),
-    .rlast                   ( uart_debug_rlast     ),
-    .rvalid                  ( uart_debug_rvalid    ),
-    .awready                 ( uart_debug_awready   ),
-    .wready                  ( uart_debug_wready    ),
-    .bid                     ( uart_debug_bid       ),
-    .bresp                   ( uart_debug_bresp     ),
-    .bvalid                  ( uart_debug_bvalid    ),
-    .irq_rx                  ( irq_rx               ),
-
-    .arid                    ( uart_debug_arid      ),
-    .araddr                  ( uart_debug_araddr    ),
-    .arlen                   ( uart_debug_arlen     ),
-    .arsize                  ( uart_debug_arsize    ),
-    .arburst                 ( uart_debug_arburst   ),
-    .arlock                  ( uart_debug_arlock    ),
-    .arcache                 ( uart_debug_arcache   ),
-    .arprot                  ( uart_debug_arprot    ),
-    .arvalid                 ( uart_debug_arvalid   ),
-    .rready                  ( uart_debug_rready    ),
-    .awid                    ( uart_debug_awid      ),
-    .awaddr                  ( uart_debug_awaddr    ),
-    .awlen                   ( uart_debug_awlen     ),
-    .awsize                  ( uart_debug_awsize    ),
-    .awburst                 ( uart_debug_awburst   ),
-    .awlock                  ( uart_debug_awlock    ),
-    .awcache                 ( uart_debug_awcache   ),
-    .awprot                  ( uart_debug_awprot    ),
-    .awvalid                 ( uart_debug_awvalid   ),
-    .wdata                   ( uart_debug_wdata     ),
-    .wstrb                   ( uart_debug_wstrb     ),
-    .wlast                   ( uart_debug_wlast     ),
-    .wvalid                  ( uart_debug_wvalid    ),
-    .bready                  ( uart_debug_bready    ),
-    .core_rst_n                ( core_rst_n             )
-);
-*/
-
 axi_crossbar_2x3 u_axi_crossbar_2x3 (
     .aclk               (sys_clk), 
     .aresetn            (sys_resetn), 
 
-    .s_axi_awid         ( {jtag_axi_awid      ,cpu_axi4_awid}),        
-    .s_axi_awaddr       ( {jtag_axi_awaddr    ,cpu_axi4_awaddr}),    
-    .s_axi_awlen        ( {jtag_axi_awlen     ,cpu_axi4_awlen}),      
-    .s_axi_awsize       ( {jtag_axi_awsize    ,cpu_axi4_awsize}),    
-    .s_axi_awburst      ( {jtag_axi_awburst   ,cpu_axi4_awburst}), 
-    .s_axi_awlock       ( {jtag_axi_awlock    ,cpu_axi4_awlock}),    
-    .s_axi_awcache      ( {jtag_axi_awcache   ,cpu_axi4_awcache}), 
-    .s_axi_awprot       ( {jtag_axi_awprot    ,cpu_axi4_awprot}),    
+    .s_axi_awid         ( {jtag_axi_awid      ,cpu_sync_awid}),        
+    .s_axi_awaddr       ( {jtag_axi_awaddr    ,cpu_sync_awaddr}),    
+    .s_axi_awlen        ( {jtag_axi_awlen     ,cpu_sync_awlen}),      
+    .s_axi_awsize       ( {jtag_axi_awsize    ,cpu_sync_awsize}),    
+    .s_axi_awburst      ( {jtag_axi_awburst   ,cpu_sync_awburst}), 
+    .s_axi_awlock       ( {jtag_axi_awlock    ,cpu_sync_awlock}),    
+    .s_axi_awcache      ( {jtag_axi_awcache   ,cpu_sync_awcache}), 
+    .s_axi_awprot       ( {jtag_axi_awprot    ,cpu_sync_awprot}),    
     .s_axi_awqos        ( 8'h0),     
-    .s_axi_awvalid      ( {jtag_axi_awvalid   ,cpu_axi4_awvalid}),  
-    .s_axi_awready      ( {jtag_axi_awready   ,cpu_axi4_awready}),          
-    .s_axi_wdata        ( {jtag_axi_wdata     ,cpu_axi4_wdata}),     
-    .s_axi_wstrb        ( {jtag_axi_wstrb     ,cpu_axi4_wstrb}),     
-    .s_axi_wlast        ( {jtag_axi_wlast     ,cpu_axi4_wlast}),     
-    .s_axi_wvalid       ( {jtag_axi_wvalid    ,cpu_axi4_wvalid}),  
-    .s_axi_wready       ( {jtag_axi_wready    ,cpu_axi4_wready}),  
-    .s_axi_bid          ( {jtag_axi_bid       ,cpu_axi4_bid}),          
-    .s_axi_bresp        ( {jtag_axi_bresp     ,cpu_axi4_bresp}),     
-    .s_axi_bvalid       ( {jtag_axi_bvalid    ,cpu_axi4_bvalid}),  
-    .s_axi_bready       ( {jtag_axi_bready    ,cpu_axi4_bready}),  
-    .s_axi_arid         ( {jtag_axi_arid      ,cpu_axi4_arid}),        
-    .s_axi_araddr       ( {jtag_axi_araddr    ,cpu_axi4_araddr}),    
-    .s_axi_arlen        ( {jtag_axi_arlen     ,cpu_axi4_arlen}),      
-    .s_axi_arsize       ( {jtag_axi_arsize    ,cpu_axi4_arsize}),    
-    .s_axi_arburst      ( {jtag_axi_arburst   ,cpu_axi4_arburst} ), 
-    .s_axi_arlock       ( {jtag_axi_arlock    ,cpu_axi4_arlock} ),    
-    .s_axi_arcache      ( {jtag_axi_arcache   ,cpu_axi4_arcache} ), 
-    .s_axi_arprot       ( {jtag_axi_arprot    ,cpu_axi4_arprot} ),    
+    .s_axi_awvalid      ( {jtag_axi_awvalid   ,cpu_sync_awvalid}),  
+    .s_axi_awready      ( {jtag_axi_awready   ,cpu_sync_awready}),          
+    .s_axi_wdata        ( {jtag_axi_wdata     ,cpu_sync_wdata}),     
+    .s_axi_wstrb        ( {jtag_axi_wstrb     ,cpu_sync_wstrb}),     
+    .s_axi_wlast        ( {jtag_axi_wlast     ,cpu_sync_wlast}),     
+    .s_axi_wvalid       ( {jtag_axi_wvalid    ,cpu_sync_wvalid}),  
+    .s_axi_wready       ( {jtag_axi_wready    ,cpu_sync_wready}),  
+    .s_axi_bid          ( {jtag_axi_bid       ,cpu_sync_bid}),          
+    .s_axi_bresp        ( {jtag_axi_bresp     ,cpu_sync_bresp}),     
+    .s_axi_bvalid       ( {jtag_axi_bvalid    ,cpu_sync_bvalid}),  
+    .s_axi_bready       ( {jtag_axi_bready    ,cpu_sync_bready}),  
+    .s_axi_arid         ( {jtag_axi_arid      ,cpu_sync_arid}),        
+    .s_axi_araddr       ( {jtag_axi_araddr    ,cpu_sync_araddr}),    
+    .s_axi_arlen        ( {jtag_axi_arlen     ,cpu_sync_arlen}),      
+    .s_axi_arsize       ( {jtag_axi_arsize    ,cpu_sync_arsize}),    
+    .s_axi_arburst      ( {jtag_axi_arburst   ,cpu_sync_arburst} ), 
+    .s_axi_arlock       ( {jtag_axi_arlock    ,cpu_sync_arlock} ),    
+    .s_axi_arcache      ( {jtag_axi_arcache   ,cpu_sync_arcache} ), 
+    .s_axi_arprot       ( {jtag_axi_arprot    ,cpu_sync_arprot} ),    
     .s_axi_arqos        ( 8'h0),      
-    .s_axi_arvalid      ( {jtag_axi_arvalid    ,cpu_axi4_arvalid} ), 
-    .s_axi_arready      ( {jtag_axi_arready    ,cpu_axi4_arready} ), 
-    .s_axi_rid          ( {jtag_axi_rid        ,cpu_axi4_rid} ),          
-    .s_axi_rdata        ( {jtag_axi_rdata      ,cpu_axi4_rdata} ),    
-    .s_axi_rresp        ( {jtag_axi_rresp      ,cpu_axi4_rresp} ),    
-    .s_axi_rlast        ( {jtag_axi_rlast      ,cpu_axi4_rlast} ),    
-    .s_axi_rvalid       ( {jtag_axi_rvalid     ,cpu_axi4_rvalid} ), 
-    .s_axi_rready       ( {jtag_axi_rready     ,cpu_axi4_rready} ), 
+    .s_axi_arvalid      ( {jtag_axi_arvalid    ,cpu_sync_arvalid} ), 
+    .s_axi_arready      ( {jtag_axi_arready    ,cpu_sync_arready} ), 
+    .s_axi_rid          ( {jtag_axi_rid        ,cpu_sync_rid} ),          
+    .s_axi_rdata        ( {jtag_axi_rdata      ,cpu_sync_rdata} ),    
+    .s_axi_rresp        ( {jtag_axi_rresp      ,cpu_sync_rresp} ),    
+    .s_axi_rlast        ( {jtag_axi_rlast      ,cpu_sync_rlast} ),    
+    .s_axi_rvalid       ( {jtag_axi_rvalid     ,cpu_sync_rvalid} ), 
+    .s_axi_rready       ( {jtag_axi_rready     ,cpu_sync_rready} ), 
 
     .m_axi_arid         ( {uart_arid    ,ram_arid   ,conf_arid   } ),
     .m_axi_araddr       ( {uart_araddr  ,ram_araddr ,conf_araddr } ),

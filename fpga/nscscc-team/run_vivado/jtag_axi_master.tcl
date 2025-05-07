@@ -57,7 +57,9 @@ proc ReadRegsToFile { start_addr num_regs filename } {
 }
 
 # 打开二进制文件用于读取
-set bin_file [open "../inst_data.bin" "rb"]
+# set bin_file [open "../inst_data.bin" "rb"]
+# set bin_file [open "../../../../software/examples/func/func_src/obj/main.bin" "rb"]
+set bin_file [open "../../../../software/examples/nscscc_perf/obj/allbench/inst_data.bin" "rb"]
 fconfigure $bin_file -translation binary
 
 # 初始地址0x1c000000

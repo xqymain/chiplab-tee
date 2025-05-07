@@ -394,4 +394,236 @@ else begin: ddr3_tb
 end
 endgenerate
 
+/**************axi协议测试******************/
+/*
+reg [31:0] read_data [3:0];
+initial begin
+    wait(u_soc_top.cpu_resetn);
+    force u_soc_top.u_cpu.awvalid = 1'b0;
+    force u_soc_top.u_cpu.wvalid  = 1'b0;
+    force u_soc_top.u_cpu.bready  = 1'b0;
+    force u_soc_top.u_cpu.arvalid = 1'b0;
+    force u_soc_top.u_cpu.rready  = 1'b0;
+    // 写地址通道
+    @(posedge u_soc_top.u_cpu.aclk);
+    force u_soc_top.u_cpu.awid = 4'h1;
+    force u_soc_top.u_cpu.awaddr = 32'h1c000000;
+    force u_soc_top.u_cpu.awlen   = 8'h00;
+    force u_soc_top.u_cpu.awsize  = 3'b010;
+    force u_soc_top.u_cpu.awburst = 2'b01;
+    force u_soc_top.u_cpu.awlock  = 1'b0;
+    force u_soc_top.u_cpu.awcache = 4'b0000;
+    force u_soc_top.u_cpu.awprot  = 3'b000;
+    force u_soc_top.u_cpu.awvalid = 1'b1;
+
+    // 等待握手完成
+    #1;
+    wait(u_soc_top.u_cpu.awready);
+    @(posedge u_soc_top.u_cpu.aclk);
+    force u_soc_top.u_cpu.awid = 4'h2;
+    force u_soc_top.u_cpu.awaddr = 32'h1c000004;
+    force u_soc_top.u_cpu.awlen   = 8'h00;
+    force u_soc_top.u_cpu.awsize  = 3'b010;
+    force u_soc_top.u_cpu.awburst = 2'b01;
+    force u_soc_top.u_cpu.awlock  = 1'b0;
+    force u_soc_top.u_cpu.awcache = 4'b0000;
+    force u_soc_top.u_cpu.awprot  = 3'b000;
+    force u_soc_top.u_cpu.awvalid = 1'b1;
+
+    // 等待握手完成
+    #1;
+    wait(u_soc_top.u_cpu.awready);
+    @(posedge u_soc_top.u_cpu.aclk);
+    force u_soc_top.u_cpu.awid = 4'h3;
+    force u_soc_top.u_cpu.awaddr = 32'h1c000008;
+    force u_soc_top.u_cpu.awlen   = 8'h00;
+    force u_soc_top.u_cpu.awsize  = 3'b010;
+    force u_soc_top.u_cpu.awburst = 2'b01;
+    force u_soc_top.u_cpu.awlock  = 1'b0;
+    force u_soc_top.u_cpu.awcache = 4'b0000;
+    force u_soc_top.u_cpu.awprot  = 3'b000;
+    force u_soc_top.u_cpu.awvalid = 1'b1;
+
+    // 等待握手完成
+    #1;
+    wait(u_soc_top.u_cpu.awready);
+    @(posedge u_soc_top.u_cpu.aclk);
+    force u_soc_top.u_cpu.awid = 4'h4;
+    force u_soc_top.u_cpu.awaddr = 32'h1c00000c;
+    force u_soc_top.u_cpu.awlen   = 8'h00;
+    force u_soc_top.u_cpu.awsize  = 3'b010;
+    force u_soc_top.u_cpu.awburst = 2'b01;
+    force u_soc_top.u_cpu.awlock  = 1'b0;
+    force u_soc_top.u_cpu.awcache = 4'b0000;
+    force u_soc_top.u_cpu.awprot  = 3'b000;
+    force u_soc_top.u_cpu.awvalid = 1'b1;
+
+    // 等待握手完成
+    #1;
+    wait(u_soc_top.u_cpu.awready);
+    @(posedge u_soc_top.u_cpu.aclk);
+    force u_soc_top.u_cpu.awvalid = 1'b0;
+
+    // 写数据通道
+    force u_soc_top.u_cpu.wid    = 4'h1;
+    force u_soc_top.u_cpu.wdata  = 32'h1111_1111;
+    force u_soc_top.u_cpu.wstrb  = 4'b1111;
+    force u_soc_top.u_cpu.wlast  = 1'b1;
+    force u_soc_top.u_cpu.wvalid = 1'b1;
+
+    // 等待写数据握手完成
+    #1;
+    wait(u_soc_top.u_cpu.wready);
+    @(posedge u_soc_top.u_cpu.aclk);
+    force u_soc_top.u_cpu.wid    = 4'h4;
+    force u_soc_top.u_cpu.wdata  = 32'h4444_4444;
+    force u_soc_top.u_cpu.wstrb  = 4'b1111;
+    force u_soc_top.u_cpu.wlast  = 1'b1;
+    force u_soc_top.u_cpu.wvalid = 1'b1;
+
+    // 等待写数据握手完成
+    #1;
+    wait(u_soc_top.u_cpu.wready);
+    @(posedge u_soc_top.u_cpu.aclk);
+    force u_soc_top.u_cpu.wid    = 4'h3;
+    force u_soc_top.u_cpu.wdata  = 32'h3333_3333;
+    force u_soc_top.u_cpu.wstrb  = 4'b1111;
+    force u_soc_top.u_cpu.wlast  = 1'b1;
+    force u_soc_top.u_cpu.wvalid = 1'b1;
+
+    // 等待写数据握手完成
+    #1;
+    wait(u_soc_top.u_cpu.wready);
+    @(posedge u_soc_top.u_cpu.aclk);
+    force u_soc_top.u_cpu.wid    = 4'h2;
+    force u_soc_top.u_cpu.wdata  = 32'h2222_2222;
+    force u_soc_top.u_cpu.wstrb  = 4'b1111;
+    force u_soc_top.u_cpu.wlast  = 1'b1;
+    force u_soc_top.u_cpu.wvalid = 1'b1;
+
+    // 等待写数据握手完成
+    #1;
+    wait(u_soc_top.u_cpu.wready);
+    @(posedge u_soc_top.u_cpu.aclk);
+    force u_soc_top.u_cpu.wvalid = 1'b0;
+
+    // 等待写响应
+    force u_soc_top.u_cpu.bready = 1'b1;
+    wait(u_soc_top.u_cpu.bvalid);
+    @(posedge u_soc_top.u_cpu.aclk);
+    force u_soc_top.u_cpu.bready = 1'b0;
+    @(posedge u_soc_top.u_cpu.aclk);
+    force u_soc_top.u_cpu.bready = 1'b1;
+    wait(u_soc_top.u_cpu.bvalid);
+    @(posedge u_soc_top.u_cpu.aclk);
+    force u_soc_top.u_cpu.bready = 1'b0;
+    @(posedge u_soc_top.u_cpu.aclk);
+    force u_soc_top.u_cpu.bready = 1'b1;
+    wait(u_soc_top.u_cpu.bvalid);
+    @(posedge u_soc_top.u_cpu.aclk);
+    force u_soc_top.u_cpu.bready = 1'b0;
+    @(posedge u_soc_top.u_cpu.aclk);
+    force u_soc_top.u_cpu.bready = 1'b1;
+    wait(u_soc_top.u_cpu.bvalid);
+    @(posedge u_soc_top.u_cpu.aclk);
+    force u_soc_top.u_cpu.bready = 1'b0;
+
+    // 读地址通道
+    @(posedge u_soc_top.u_cpu.aclk);
+    force u_soc_top.u_cpu.arid    = 4'h1;
+    force u_soc_top.u_cpu.araddr  = 32'h1c000000;
+    force u_soc_top.u_cpu.arlen   = 8'h00;
+    force u_soc_top.u_cpu.arsize  = 3'b010;
+    force u_soc_top.u_cpu.arburst = 2'b01;
+    force u_soc_top.u_cpu.arlock  = 1'b0;
+    force u_soc_top.u_cpu.arcache = 4'b0000;
+    force u_soc_top.u_cpu.arprot  = 3'b000;
+    force u_soc_top.u_cpu.arvalid = 1'b1;
+    
+    // 等待读地址握手完成
+    #1;
+    wait(u_soc_top.u_cpu.arready);
+    @(posedge u_soc_top.u_cpu.aclk);
+    force u_soc_top.u_cpu.arid    = 4'h2;
+    force u_soc_top.u_cpu.araddr  = 32'h1c000004;
+    force u_soc_top.u_cpu.arlen   = 8'h00;
+    force u_soc_top.u_cpu.arsize  = 3'b010;
+    force u_soc_top.u_cpu.arburst = 2'b01;
+    force u_soc_top.u_cpu.arlock  = 1'b0;
+    force u_soc_top.u_cpu.arcache = 4'b0000;
+    force u_soc_top.u_cpu.arprot  = 3'b000;
+    force u_soc_top.u_cpu.arvalid = 1'b1;
+
+    // 等待读地址握手完成
+    #1;
+    wait(u_soc_top.u_cpu.arready);
+    @(posedge u_soc_top.u_cpu.aclk);
+    force u_soc_top.u_cpu.arid    = 4'h3;
+    force u_soc_top.u_cpu.araddr  = 32'h1c000008;
+    force u_soc_top.u_cpu.arlen   = 8'h00;
+    force u_soc_top.u_cpu.arsize  = 3'b010;
+    force u_soc_top.u_cpu.arburst = 2'b01;
+    force u_soc_top.u_cpu.arlock  = 1'b0;
+    force u_soc_top.u_cpu.arcache = 4'b0000;
+    force u_soc_top.u_cpu.arprot  = 3'b000;
+    force u_soc_top.u_cpu.arvalid = 1'b1;
+
+    // 等待读地址握手完成
+    #1;
+    wait(u_soc_top.u_cpu.arready);
+    @(posedge u_soc_top.u_cpu.aclk);
+    force u_soc_top.u_cpu.arid    = 4'h4;
+    force u_soc_top.u_cpu.araddr  = 32'h1c00000c;
+    force u_soc_top.u_cpu.arlen   = 8'h00;
+    force u_soc_top.u_cpu.arsize  = 3'b010;
+    force u_soc_top.u_cpu.arburst = 2'b01;
+    force u_soc_top.u_cpu.arlock  = 1'b0;
+    force u_soc_top.u_cpu.arcache = 4'b0000;
+    force u_soc_top.u_cpu.arprot  = 3'b000;
+    force u_soc_top.u_cpu.arvalid = 1'b1;
+
+    // 等待读地址握手完成
+    #1;
+    wait(u_soc_top.u_cpu.arready);
+    @(posedge u_soc_top.u_cpu.aclk);
+    force u_soc_top.u_cpu.arvalid = 1'b0;
+    
+    // 读数据通道
+    force u_soc_top.u_cpu.rready = 1'b1;
+    
+    // 等待读数据有效
+    #1;
+    wait(u_soc_top.u_cpu.rvalid);
+    read_data[0] = u_soc_top.u_cpu.rdata;
+    @(posedge u_soc_top.u_cpu.aclk);
+    force u_soc_top.u_cpu.rready = 1'b0;
+    @(posedge u_soc_top.u_cpu.aclk);
+
+    force u_soc_top.u_cpu.rready = 1'b1;
+    #1;
+    wait(u_soc_top.u_cpu.rvalid);
+    read_data[1] = u_soc_top.u_cpu.rdata;
+    @(posedge u_soc_top.u_cpu.aclk);
+    force u_soc_top.u_cpu.rready = 1'b0;
+    @(posedge u_soc_top.u_cpu.aclk);
+
+    force u_soc_top.u_cpu.rready = 1'b1;
+    #1;
+    wait(u_soc_top.u_cpu.rvalid);
+    read_data[2] = u_soc_top.u_cpu.rdata;
+    @(posedge u_soc_top.u_cpu.aclk);
+    force u_soc_top.u_cpu.rready = 1'b0;
+    @(posedge u_soc_top.u_cpu.aclk);
+
+    force u_soc_top.u_cpu.rready = 1'b1;
+    #1;
+    wait(u_soc_top.u_cpu.rvalid);
+    read_data[3] = u_soc_top.u_cpu.rdata;
+    @(posedge u_soc_top.u_cpu.aclk);
+    force u_soc_top.u_cpu.rready = 1'b0;
+    @(posedge u_soc_top.u_cpu.aclk);
+
+    $finish;
+end
+*/
 endmodule
