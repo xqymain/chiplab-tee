@@ -7,36 +7,26 @@ Chiplab支持龙芯杯团体赛的功能测试与性能测试，有关Chiplab的
 ├── chip&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;SoC顶层。    
 │　　└── soc_demo&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;SoC顶层代码实例。   
 │　　　　　├── nscscc-team&emsp;&emsp;&emsp;&ensp;<font color='red'>龙芯杯SoC顶层代码。</font>   
-│　　　　　　　　├── axi_wrap&emsp;&emsp;&emsp;&emsp;&emsp;&ensp;<font color='red'>cpu axi 接口包装一层，使仿真和上板 axi 访问行为一致。</font>   
+│　　　　　　　　├── AMBA&emsp;&emsp;&emsp;&emsp;&emsp;&ensp;<font color='red'>包含axi3转axi4协议桥和axi跨时钟域模块</font>   
 │　　　　　　　　├── CONFREG&emsp;&emsp;&emsp;&emsp;&emsp;<font color='red'>confreg 模块，连接 CPU 与开发板上数码管、拨码开关等 GPIO 类设备。</font>   
-│　　　　　　　　├── ram_wrap&emsp;&emsp;&emsp;&emsp;&emsp;<font color='red'>axi ram 的封装层，增加固定延迟设置。</font>   
-│　　　　　　　　├── uart_debug&emsp;&emsp;&emsp;&emsp;&emsp;<font color='red'>串口下载模块。</font>   
+│　　　　　　　　├── ram_wrap&emsp;&emsp;&emsp;&emsp;&emsp;<font color='red'>包含ddr3控制器和片上SRAM的封装层，增加固定延迟设置。</font>   
+│　　　　　　　　├── JTAG_wrap&emsp;&emsp;&emsp;&emsp;&emsp;<font color='red'>jtag to axi master IP的封装层，用于程序下载和调试。</font>   
+│　　　　　　　　├── uart_debug&emsp;&emsp;&emsp;&emsp;&emsp;<font color='red'>串口下载程序模块，目前已不使用。</font>   
 │　　　　　　　　├── xilinx_ip&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;<font color='red'>Xilinx IP，包含 clk_pll、axi_crossbar_2x3。</font>  
 │　　　　　　　　├── soc_top.v&emsp;&emsp;<font color='red'>SoC 的顶层。</font>  
-│　　　　　　　　├── soc_config.vh&emsp;&emsp;&emsp;&ensp;<font color='red'>配置SoC为功能测试或性能测试的头文件。</font>  
+│　　　　　　　　└── soc_config.vh&emsp;&emsp;&emsp;&ensp;<font color='red'>配置SoC为功能测试或性能测试的头文件。</font>  
 │　　　　　├── loongson&emsp;&emsp;&emsp;&ensp;龙芯实验箱SoC顶层代码。   
 │　　　　　├── Baixin&emsp;&emsp;&emsp;&emsp;&emsp;&ensp;百芯开发板SoC顶层代码。   
 │　　　　　└── sim&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;仿真SoC顶层代码   
 ├── fpga&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;综合工程。   
 │　　├── nscscc-team&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;<font color='red'>龙芯杯fpga工程及所需嵌入式软件。</font>   
-│　　　　　├── run_vivado&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;<font color='red'>Vivado工程目录</font>   
-│　　　　　　　　├── constraints&emsp;&emsp;&emsp;&emsp;<font color='red'>约束文件</font>   
-│　　　　　　　　├── testbench&emsp;&emsp;&emsp;&emsp;<font color='red'>前仿测试文件</font>   
+│　　　　　├── run_vivado&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;<font color='red'>Vivado工程目录</font>    
 │　　　　　　　　├── create_project.tcl&emsp;&emsp;&emsp;<font color='red'>Vivado工程创建脚本</font>    
 │　　　　　　　　├── run_func_test.tcl&emsp;&emsp;&emsp;<font color='red'>运行功能测试脚本</font>    
 │　　　　　　　　├── run_allbench.tcl&emsp;&emsp;&emsp;<font color='red'>运行性能测试脚本</font>    
-│　　　　　└── software&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;<font color='red'>Vivado中前仿/上板所需嵌入式软件</font>   
-│　　　　　　　　├── func&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;<font color='red'>功能测试</font>   
-│　　　　　　　　　　　├── Makefile&emsp;&emsp;&emsp;<font color='red'>生成功能测试所需obj使用的编译脚本</font>   
-│　　　　　　　　└── perf&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;<font color='red'>性能测试</font>   
-│　　　　　　　　　　　├── bench&emsp;&emsp;&emsp;&emsp;<font color='red'>性能测试c源码</font>   
-│　　　　　　　　　　　├── include&emsp;&emsp;&emsp;&emsp;<font color='red'>性能测试头文件</font>   
-│　　　　　　　　　　　├── lib&emsp;&emsp;&emsp;&emsp;&emsp;<font color='red'>性能测试所需c库</font>   
-│　　　　　　　　　　　├── obj&emsp;&emsp;&emsp;&emsp;&emsp;<font color='red'>性能测试编译结果</font>   
-│　　　　　　　　　　　├── bin.lds.S&emsp;&emsp;&emsp;&emsp;<font color='red'>交叉编译的链接脚本源码</font>   
-│　　　　　　　　　　　├── convert.c&emsp;&emsp;&emsp;&emsp;<font color='red'>生成 coe 和 mif 文件的本地执行程序源码</font>   
-│　　　　　　　　　　　├── start.s&emsp;&emsp;&emsp;&emsp;&emsp;<font color='red'>主函数</font>   
-│　　　　　　　　　　　├── Makefile&emsp;&emsp;&emsp;&emsp;<font color='red'>性能测试编译脚本</font>   
+│　　　　　　　　└── jtag_axi_master.tcl&emsp;&emsp;&emsp;<font color='red'>JTAG程序下载脚本</font>    
+│　　　　　├── constraints&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;<font color='red'>约束文件</font>   
+│　　　　　└── testbench&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;<font color='red'>仿真测试文件</font>   
 │　　├── loongson&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;龙芯实验箱综合工程。   
 │　　　　　├── 2019.2&emsp;&emsp;&emsp;&emsp;对应Vivado 2019.2版本。   
 │　　　　　└── 2023.2&emsp;&emsp;&emsp;&ensp;对应Vivado 2023.2版本。   
@@ -63,17 +53,24 @@ Chiplab支持龙芯杯团体赛的功能测试与性能测试，有关Chiplab的
 │　　　　　├── run_random&emsp;&emsp;&ensp;随机指令序列运行目录。   
 │　　　　　└── testbench&emsp;&emsp;&emsp;&ensp;testbech源码，提供仿真运行、在线比对、设备模拟等功能。   
 ├── software&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&ensp;测试用例。   
-│　　├── coremark&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&ensp;coremark性能测试程序。   
-│　　├── dhrystone&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&ensp;dhrystone性能测试程序。  
-│　　├── func&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;<font color='red'>功能测试点，验证处理器核设计是否与指令手册一致，龙芯杯也使用该目录的c源码进行功能测试。</font>   
-│　　├── linux&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&ensp;提供内核启动的支持。   
-│　　├── random_boot&emsp;&emsp;&emsp;&emsp;&emsp;为随机指令序列的运行提供支持。   
-│　　├── random_res&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;存放随机指令序列。   
-│　　└── generic&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;通用的编译脚本。   
+│　　├── bsp&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;板级支持包。   
+│　　├── examples&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;示例程序。   
+│　　　　　├── func&emsp;&emsp;&emsp;&emsp;<font color='red'>功能测试，验证处理器核设计是否与指令手册一致，龙芯杯也使用该目录下的func_src进行功能测试。</font>   
+│　　　　　├── nscscc_perf&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;<font color='red'>性能测试，包含20个性能测试程序。</font>   
+│　　　　　├── hello_world&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&ensp;基础测试程序。   
+│　　　　　├── coremark&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&ensp;coremark性能测试程序。   
+│　　　　　├── dhrystone&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&ensp;dhrystone性能测试程序。  
+│　　　　　├── fireye&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&ensp;fireye测试程序。   
+│　　　　　├── c_prg&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&ensp;C程序测试。   
+│　　　　　├── rtthread&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&ensp;rtthread嵌入式实时操作系统。   
+│　　　　　├── linux&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&ensp;提供内核启动的支持。   
+│　　　　　├── random_boot&emsp;&emsp;&emsp;&emsp;&emsp;为随机指令序列的运行提供支持。   
+│　　　　　└── random_res&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;存放随机指令序列。    
 └── toolchains&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;chiplab运行所需工具。    
 　　　├── loongarch32r-linux-gnusf-\*&emsp;&emsp;&emsp;gcc工具链。  
 　　　├── nemu&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;nemu模拟器，用于在线实时比对。   
-　　　└── system_newlib&emsp;&emsp;&emsp;&emsp;newlib C库，用于编译C程序。
+　　　├── picolibc&emsp;&emsp;&emsp;&emsp;picolibc库，用于编译C程序。
+　　　└── newlib&emsp;&emsp;&emsp;&emsp;newlib C库，用于编译C程序。
 
 ## 3. 环境下载与安装
 ### 3.1 下载本仓库
@@ -85,12 +82,14 @@ Chiplab支持龙芯杯团体赛的功能测试与性能测试，有关Chiplab的
 toolchains这个目录是存在的，只不过里面是空的，需要用户自行下载，详情请参考`toolchains/README.md`。
 
 ### 3.3 项目所需第三方工具安装
-以Ubuntu (Windows 10+ 请基于WSL**2**)为例:
+以Ubuntu (Windows 10+ WSL**2**)为例:
 
 ```
 # 终端运行
 sudo apt install verilator gtkwave #verilator version 4.224 (loongarch64 4.222+)    
 ```
+
+vivado 2023.2 可以直接安装在windows上
 
 ## 4. 实验步骤
 
@@ -181,14 +180,14 @@ module core_top(
 
 2）【编译software】发布包默认提供编译好的obj。
 
-特别注意：功能测试和性能测试发布包中默认提供的obj为无chache版本，若实现了cache和cacop指令，需要将`chiplab/fpga/nscscc-team/software/perf/Makefile`文件的第二行改为`AFLAGS+=-Dhas_cache=1`。将`chiplab/fpga/nscscc-team/software/func/Makefile`文件的第七行改为`CACHEFLAGS = -Dvivado -Dhas_cache=1`。该宏置为1后会使用cacop指令在每次复位后执行cache初始化。
+特别注意：功能测试和性能测试发布包中默认提供的obj为无chache版本，若实现了cache和cacop指令，需要将`chiplab/software/examples/nscscc_perf/Makefile`文件的第二行改为`AFLAGS+=-Dhas_cache=1`。将`chiplab/software/examples/func/func_src/Makefile`文件的第四行改为`CACHEFLAGS = -Dhas_cache=1`。该宏置为1后会使用cacop指令在每次复位后执行cache初始化。
 
 同时将`-Dcache_index_depth=0x100 -Dcache_offset_width=0x4 -Dcache_way=2`修改为对应值，分别是index深度，offset位宽，way。
 
 之后重新编译性能测试：
 
 ```
-cd $CHIPLAB_HOME/fpga/nscscc-team/software/perf #进入性能测试目录
+cd $CHIPLAB_HOME/software/examples/nscscc_perf  #进入性能测试目录
 make clean                                      #清除已有编译结果
 make                                            #执行性能测试编译
 ```
@@ -196,12 +195,12 @@ make                                            #执行性能测试编译
 重新编译功能测试：
 
 ```
-cd $CHIPLAB_HOME/fpga/nscscc-team/software/func #进入功能测试目录
-make clean                                      #清除已有编译结果
-make                                            #执行功能测试编译
+cd $CHIPLAB_HOME/software/examples/func/func_src #进入功能测试目录
+make clean                                       #清除已有编译结果
+make                                             #执行功能测试编译
 ```
 
-完成编译后，在fpga/nscscc-team/software/func/obj目录下可以看到功能测试的编译结果
+完成编译后，在software/examples/func/func_src/obj目录下可以看到功能测试的编译结果
 
 | 文件名     | 解释     |
 | -------- | -------- |
@@ -212,7 +211,7 @@ make                                            #执行功能测试编译
 | inst_ram.mif | Memory Initialization File 文件 |
 | inst_ram.coe | 重新定制vivado ip核 axi ram 所需的 coe 文件 |
 
-在fpga/nscscc-team/software/perf/obj的各子目录存放性能测试的编译结果
+在software/examples/nscscc_perf/obj的各子目录存放性能测试的编译结果
 
 | 子目录     | 解释     |
 | -------- | -------- |
@@ -244,7 +243,7 @@ make                                            #执行功能测试编译
 | 文件名     | 解释     |
 | -------- | -------- |
 | main.elf | 生成的可执行文件，属于中间文件 |
-| inst_data.bin | 由main.elf生成的二进制文件，包含代码、数据段，用于 vivado 前仿和上板下载 |
+| inst_data.bin | 由main.elf生成的二进制文件，包含代码、数据段，用于 vivado 仿真和上板下载 |
 | test.s   | 对 main.elf 反汇编得到的文件，可根据其中的PC和指令码用于调试 |
 | axi_ram.mif | Memory Initialization File 文件 |
 | axi_ram.coe | 重新定制vivado ip核 axi ram 所需的 coe 文件 |
@@ -262,9 +261,9 @@ source create_project.tcl
 
 5）【进行功能测试仿真】
 
-首先修改 `$CHIPLAB_HOME/chip/soc_demo/nscscc-team/soc_config.vh`头文件，打开 `RUN_FUNC_TEST`宏，关闭`RUN_PERF_TEST`宏。
+首先修改 `$CHIPLAB_HOME/chip/soc_demo/nscscc-team/soc_config.vh`头文件，打开 `RUN_FUNC_TEST`宏，关闭`RUN_PERF_TEST`宏。该文件还存在两个可供调整的宏`SIMU_USE_PLL`和`SIMU_USE_DDR`，`SIMU_USE_PLL`为1时使用PLL产生时钟，为0时使用仿真时钟；`SIMU_USE_DDR`为1时使用DDR3作为内存，为0时使用仿真SRAM模型作为内存。两者均为0时仿真速度最快，为1时更符合上FPGA板的情况。
 
-之后在Vivado中点击Run Simulation。打开仿真界面后在控制台Tcl Console中执行下列命令，进行地址切换与调用tcl脚本执行仿真：
+完成宏的修改后在Vivado中点击Run Simulation。打开仿真界面后在控制台Tcl Console中执行下列命令，进行地址切换与调用tcl脚本执行仿真：
 
 ```
 cd [get_property DIRECTORY [current_project]]
@@ -277,13 +276,13 @@ source ../run_func_test.tcl
 
 首先修改 `$CHIPLAB_HOME/chip/soc_demo/nscscc-team/soc_config.vh`头文件，打开 `RUN_PERF_TEST`宏，关闭`RUN_FUNC_TEST`宏。
 
-在性能测试中，还需要注意`$CHIPLAB_HOME/chip/soc_demo/nscscc-team/soc_config.vh`头文件中的`RUN_PERF_NO_DELAY`宏。打开该宏后，可以关闭 AXI RAM 的固定延时机制，以加快仿真。性能测试分数提交应当是关闭`RUN_PERF_NO_DELAY`宏的分数。
+在性能测试中，还需要注意`$CHIPLAB_HOME/chip/soc_demo/nscscc-team/soc_config.vh`头文件中的`RUN_PERF_NO_DELAY`宏。打开该宏后，可以关闭内存的延时倍增，以加快仿真。性能测试分数提交应当是关闭`RUN_PERF_NO_DELAY`宏的分数。
 
 在Vivado中点击Run Simulation。打开仿真界面后在控制台Tcl Console中执行下列命令，进行地址切换、更换内存初始化文件、重新开始仿真。
 
 ```
 cd [get_property DIRECTORY [current_project]]
-file copy -force ../../software/perf/obj/stream_copy/axi_ram.mif ./loongson.sim/sim_1/behav/xsim/axi_ram.mif
+file copy -force ../../../../software/examples/nscscc_perf/obj/stream_copy/inst_data.bin ../inst_data.bin
 restart
 run all
 ```
@@ -313,43 +312,40 @@ source ../run_allbench.tcl
 
 首先修改 `chiplab/chip/soc_demo/nscscc-team/soc_config.vh`头文件，打开 `RUN_FUNC_TEST`宏，关闭`RUN_PERF_TEST`宏。
 
-2）修改 IP Sources -> axi_ram -> Other Options -> COE File。之后进行综合、实现、bit生成。(串口下载出错的同学请通过 axi_ram 初始化进行 software 切换)
+2）点击`Generate Bitstream`进行综合、实现、bit生成。
 
 3）下载bit文件
 
-4）通过UART下载bin文件
+打开Open Hardware Manager，连接好FPGA开发板后，选择Program Device，自动选择最新生成的比特文件。选择Program，等待下载完成。
 
-UART下载功能移植自[tinyriscv](https://gitee.com/liangkangnan/tinyriscv/)，修改了axi总线支持。
+4）通过JTAG下载bin文件
 
-使用脚本：`chiplab/fpga/nscscc-team/software/uart_downloader.py`进行下载，在`chiplab/fpga/nscscc-team/software`目录下执行下载命令：
+首先需要修改脚本`fpga/nscscc_team/run_vivado/jtag_axi_mater.tcl`第60行至第62行，选择需要下载的bin文件。这三行分别代表刚刚仿真中使用的bin文件、功能测试bin文件、性能测试bin文件。现在希望进行功能测试，因此打开第二行，将另外两行注释掉。
 
-在Windows环境下：
+```
+# set bin_file [open "../inst_data.bin" "rb"]
+set bin_file [open "../../../../software/examples/func/func_src/obj/main.bin" "rb"]
+# set bin_file [open "../../../../software/examples/nscscc_perf/obj/allbench/inst_data.bin" "rb"]
+```
 
-`python .\uart_downloader.py 串口号 bin文件`
+完成修改后在Hardware Manager界面下方，Tcl Console中调用脚本进行bin文件下载，使用的命令如下。
+```
+cd [get_property DIRECTORY [current_project]]
+source ../jtag_axi_master.tcl
+```
 
-例如
+脚本运行完成后便已经将bin文件下载至DDR3中。另外，为方便调试，运行完脚本后还可以使用下列函数进行内存读写。
 
-`python .\uart_downloader.py COM3 D:\chiplab\fpga\nscscc-team\software\func\obj\main.bin`
+```
+# 从0x1c000000地址处读32位数据
+ReadReg 1c000000
 
-在Linux环境下：
+# 向0x1c000000地址处写32位数据
+WriteReg 1c000000 00000000
 
-`python3 ./uart_downloader.py 串口号 bin文件`
-
-例如
-
-`python3 ./uart_downloader.py /dev/ttyUSB0 ./func/obj/main.bin`
-
-bin文件下载完成后会自动复位处理器核，即可看到实验现象。若执行完成当前测试希望进行下一个测试，直接运行新测试bin的下载命令即可。
-
-另外该脚本支持复位命令，发送后对处理器核与confreg进行复位
-
-在Windows环境下：
-
-`python .\uart_downloader.py 串口号 reset`
-
-在Linux环境下：
-
-`python3 ./uart_downloader.py 串口号 reset`
+# 连续从0x1c000000地址读取10个32位寄存器值并写入文件
+ReadRegsToFile 0x1c000000 10 ../log.txt 
+```
 
 5）观察实验现象
 在FPGA上板验证时其结果正确与否的判断只有一种方法，func正确的执行行为是：
@@ -369,21 +365,27 @@ bin文件下载完成后会自动复位处理器核，即可看到实验现象�
 
 首先修改 `chiplab/chip/soc_demo/nscscc-team/soc_config.vh`头文件，打开 `RUN_PERF_TEST`宏，关闭`RUN_FUNC_TEST`宏，关闭`RUN_PERF_NO_DELAY`宏。
 
-2）修改 IP Sources -> axi_ram -> Other Options -> COE File。之后进行综合、实现、bit生成。(串口下载出错的同学请通过 axi_ram 初始化进行 software 切换)
+2）点击`Generate Bitstream`进行综合、实现、bit生成。
 
 3）下载bit文件
 
-4）通过UART下载bin文件
+打开Open Hardware Manager，连接好FPGA开发板后，选择Program Device，自动选择最新生成的比特文件。选择Program，等待下载完成。
 
-可以下载单个性能测试bin文件，如：
+4）通过JTAG下载bin文件
 
-`python .\uart_downloader.py COM3 D:\chiplab\fpga\nscscc-team\software\perf\obj\bitcount\inst_data.bin`
+首先需要修改脚本`fpga/nscscc_team/run_vivado/jtag_axi_mater.tcl`第60行至第62行，选择需要下载的bin文件。现在希望进行性能测试，因此打开第三行，将另外两行注释掉。
 
-下载完成后自动复位执行，如果性能测试上板正确运行，双色 LED 灯全变为绿色，16 个单色 LED 全灭。如果性能测试的功能错误，双色 LED 灯会变成一绿一红，16 个单色 LED 灯全亮。无论功能是否正确都会在数码管上显示计数周期。
+```
+# set bin_file [open "../inst_data.bin" "rb"]
+# set bin_file [open "../../../../software/examples/func/func_src/obj/main.bin" "rb"]
+set bin_file [open "../../../../software/examples/nscscc_perf/obj/allbench/inst_data.bin" "rb"]
+```
 
-也可以下载allbench的性能测试bin文件，通过拨码开关确定进行的测试程序，如：
-
-`python .\uart_downloader.py COM3 D:\chiplab\fpga\nscscc-team\software\perf\obj\allbench\inst_data.bin`
+完成修改后在Hardware Manager界面下方，Tcl Console中调用脚本进行bin文件下载，使用的命令如下。
+```
+cd [get_property DIRECTORY [current_project]]
+source ../jtag_axi_master.tcl
+```
 
 下载 allbench 的 bin 文件后，在实验板上使用 8 个拨码开关的右侧 4 个选择运行哪个测试，随后按复位键，开始运行由拨码开关指定的测试。约定拨码开关拨上为 1，拨下为 0，则 4 个拨码开关与性能测试程序的对应关系如下表。
 
@@ -411,34 +413,7 @@ bin文件下载完成后会自动复位处理器核，即可看到实验现象�
 | 20| minmax_sequence | 5'b1_0100 |
 | 其它| 不运行性能测试 | 其它 |
 
-#### 4.3.3 关于 Windows + WSL2 进行串口下载的说明
-
-如果使用 Windows + WSL2，希望从 WSL2 中进行串口下载，需要参照微软的[连接USB设备](https://learn.microsoft.com/zh-cn/windows/wsl/connect-usb)，在Windows上安装usbipd-win，并将对应的USB设备附加到WSL2中。
-
-Windows下设置需要加载的USB设备，常用命令如下：
-
-`usbipd list` 查看USB设备列表
-
-`usbipd bind --busid <busid>` 共享设备
-
-`usbipd attach --wsl --busid <busid>` 加载对应设备到WSL
-
-`usbipd detach --busid <busid>` 从Windows中断开设备
-
-`usbipd detach --busid <busid>` 从WSL2中归还设备至Windows
-
-之后在 WSL2 中，首先安装环境：
-
-```
-sudo apt install linux-tools-generic hwdata
-sudo update-alternatives --install /usr/local/bin/usbip usbip /usr/lib/linux-tools/6.8.0-39-generic/usbip 20
-```
-
-其中第二条命令中的`6.8.0-39`需要根据第一条`sudo apt install linux-tools-generic hwdata`安装的版本号进行修改
-
-之后在WSL2中查看USB设备，使用命令`lsusb`后，应能看到`Bus 001 Device 004: ID 0403:6001 Future Technology Devices International, Ltd FT232 Serial (UART) IC`，代表已经读取到USB设备。使用命令`ls /dev/ttyUSB*`查看串口号，即可使用该串口进行下载。
-
-#### 4.3.4 CPU 频率调整
+#### 4.3.3 CPU 频率调整
 
 性能测试统计的是 myCPU 运行性能测试程序实际花费的时间，其原理是：测试换 SoC_AXI_Lite 里设置了一
 个固定 100MHz 的计时器，在运行性能测试程序的前后读取该计时器，其差值就是运行这一性能测试程序的所花费的实际时间。因而需要大家自行调整 SoC_AXI_Lite 里的 cpu_clk，使其为 myCPU 支持的最高频率，以获取最高性能分。调整 cpu_clk 的方法为：
@@ -454,7 +429,7 @@ sudo update-alternatives --install /usr/local/bin/usbip usbip /usr/lib/linux-too
 
 (3) myCPU 一定是嵌入到性能测试环境 SoC_AXI_Lite 里综合实现后 WNS 非负值。如果预赛提交作品不满足该项，性能测试分记为 0 分。
 
-#### 4.3.5 综合、实现的优化参数不允许修改
+#### 4.3.4 综合、实现的优化参数不允许修改
 
 大赛统一要求：不允许自行修改综合、实现、生成 Bit 流文件时候的参数，也不允许修改约束文件 soc_lite.xdc。
 
@@ -463,7 +438,7 @@ sudo update-alternatives --install /usr/local/bin/usbip usbip /usr/lib/linux-too
 我们在评审预赛作品时，会严格按照发布包里的环境进行综合、实现并查看上板情况，如果有时序违约，按
 照“预赛提交说明.pdf”，得分会记为 0 分。
 
-在新的发布包里，我们已经性能测试环境 perf_test/soc_axi_pref 里的综合、实现策略实现为性能优化优先。
+在新的发布包里，综合、实现策略为性能优化优先。
 
 之所以不允许大家再修改编译参数，是因为时间有限，不希望大家将时间浪费在尝试（调试）综合、实现各
 种参数以获得最高频率。其实再精细优化综合、实现的参数，也最多只能再获得少许的频率提升。我们希望大家将时间尽量花在有意义的事情上，比如设计 myCPU 之上运行的应用、系统等。

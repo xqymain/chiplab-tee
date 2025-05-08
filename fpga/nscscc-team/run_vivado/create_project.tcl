@@ -5,7 +5,6 @@ set project_part xc7a200tfbg676-2
 # CLEAR
 file delete -force $project_path
 file delete -force ../../../chip/soc_demo/nscscc-team/xilinx_ip/clk_pll/gen
-file delete -force ../../../chip/soc_demo/nscscc-team/xilinx_ip/axi_clock_converter/gen
 file delete -force ../../../chip/soc_demo/nscscc-team/xilinx_ip/axi_crossbar_2x3/gen
 file delete -force ../../../chip/soc_demo/nscscc-team/xilinx_ip/jtag_axi/gen
 file delete -force ../../../chip/soc_demo/nscscc-team/xilinx_ip/mig_axi_32/gen
@@ -24,13 +23,13 @@ add_files -norecurse "../../../IP/AMBA/axi2apb.v"
 add_files -quiet [glob -nocomplain ../../../chip/soc_demo/nscscc-team/xilinx_ip/*/*.xci]
 
 # Add simulation files
-add_files -fileset sim_1 ./testbench
+add_files -fileset sim_1 ../testbench
 
 # Add myCPU
 add_files -scan_for_includes ../../../IP/myCPU
 
 # Add constraints
-add_files -fileset constrs_1 -quiet ./constraints
+add_files -fileset constrs_1 -quiet ../constraints
 
 set_property top soc_top [current_fileset]
 set_property -name "top" -value "tb_top" -objects  [get_filesets sim_1]
