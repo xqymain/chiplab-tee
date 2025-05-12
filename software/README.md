@@ -50,54 +50,57 @@ $ make
 
 ### 3.3 使用龙芯杯SoC在Vivado中前仿
 
-由于龙芯杯前仿的testbench在终端中输出时使用的是CONFREG模拟的UART，因此首先将`software/examples/hello_world/main.c`中全局变量`UART_BASE`设为0，此时不再使用UART16550，而是读取全局变量`CONFREG_UART_BASE`向模拟UART输出。
+首先编译生成软件bin文件
 
-之后
 ```
 $ cd $CHIPLAB_HOME/software/examples/hello_world
 $ make clean
 $ make
 ```
-得到的obj文件夹中的mif文件和coe文件就可以用作vivado前仿真。
+生成的obj文件夹中有仿真和上板所需bin文件。
 
 在Vivado中点击Run Simulation。打开仿真界面后在控制台Tcl Console中执行下列命令，进行地址切换、更换内存初始化文件、重新开始仿真。
 
 ```
 cd [get_property DIRECTORY [current_project]]
-file copy -force ../../../../software/examples/hello_world/obj/axi_ram.mif ./loongson.sim/sim_1/behav/xsim/axi_ram.mif
+file copy -force ../../../../software/examples/hello_world/obj/hello_world.bin ../inst_data.bin
 restart
 run all
 ```
 之后就能在vivado终端中看到`Hello Loongarch32r!`
 
 ### 3.4 使用龙芯杯SoC在FPGA上运行
-在FPGA上运行时需要使用真串口UART16550进行输出，因此首先将`software/examples/hello_world/main.c`中全局变量`UART_BASE`设为`0xbfe001e0`。
 
-之后
+使用的bin文件依然是仿真中使用的bin文件。完成FPGAbit生成和下载后，使用JTAG将软件bin文件下载至内存DDR3中。
+
+首先需要修改脚本`fpga/nscscc_team/run_vivado/jtag_axi_mater.tcl`第60行至第62行，选择需要下载的bin文件。若刚刚运行完仿真，则路径`../inst_data.bin`就是希望下载的hello_word.bin。否则修改为`set bin_file [open "../../../../software/examples/hello_world/obj/hello_world.bin" "rb"]`。
+
 ```
-$ cd $CHIPLAB_HOME/software/examples/hello_world
-$ make clean
-$ make
+set bin_file [open "../inst_data.bin" "rb"]
+# set bin_file [open "../../../../software/examples/nscscc_func/obj/main.bin" "rb"]
+# set bin_file [open "../../../../software/examples/nscscc_perf/obj/allbench/inst_data.bin" "rb"]
 ```
-得到的obj文件夹中的hello_world.bin文件可以用来串口下载至ram中，使用的串口下载上位机软件是本目录下的`uart_downloader.py`.
 
-在Windows环境下：
+完成修改后在Hardware Manager界面下方，Tcl Console中调用脚本进行bin文件下载，使用的命令如下。
+```
+cd [get_property DIRECTORY [current_project]]
+source ../jtag_axi_master.tcl
+```
 
-`python .\uart_downloader.py 串口号 bin文件`
+脚本运行完成后便已经将bin文件下载至DDR3中。另外，为方便调试，运行完脚本后还可以使用下列函数进行内存读写。
 
-例如
+```
+# 从0x1c000000地址处读32位数据
+ReadReg 1c000000
 
-`python .\uart_downloader.py COM3 D:\chiplab\software\examples\hello_world\obj\hello_world.bin`
+# 向0x1c000000地址处写32位数据
+WriteReg 1c000000 00000000
 
-在Linux环境下：
+# 连续从0x1c000000地址读取10个32位寄存器值并写入文件
+ReadRegsToFile 0x1c000000 10 ../log.txt 
+```
 
-`python3 ./uart_downloader.py 串口号 bin文件`
-
-例如
-
-`python3 ./uart_downloader.py /dev/ttyUSB0 ./examples/hello_world/obj/hello_world.bin`
-
-bin文件下载完成后会自动复位处理器核，此时来不及打开串口助手看输出，可以连接串口助手后手动按下复位，即可看到`Hello Loongarch32r!`。
+连接串口助手后手动按下复位，即可看到`Hello Loongarch32r!`。
 
 ## 4. 基于该SDK进行自主嵌入式软件开发
 
@@ -109,12 +112,11 @@ bin文件下载完成后会自动复位处理器核，此时来不及打开串�
 ```c
 //BSP板级支持包所需全局变量
 unsigned long UART_BASE = 0xbfe001e0;					//UART16550的虚地址
-unsigned long CONFREG_UART_BASE = 0xbfafff10;			//CONFREG模拟UART的虚地址
 unsigned long CONFREG_TIMER_BASE = 0xbfafe000;			//CONFREG计数器的虚地址
 unsigned long CONFREG_CLOCKS_PER_SEC = 100000000L;		//CONFREG时钟频率
 unsigned long CORE_CLOCKS_PER_SEC = 33000000L;			//处理器核时钟频率
 ```
-里面的数值需根据SoC实际情况给出，若使用CHIPLAB提供的龙芯杯SoC则不需变更参数，只需注意`UART_BASE`为0时使用CONFREG模拟UART，非0时使用真实的UART16550。
+里面的数值需根据SoC实际情况给出，若使用CHIPLAB提供的龙芯杯SoC则不需变更参数。
 
 ### 步骤二：修改Makefile
 
@@ -141,10 +143,10 @@ test)
 
 ### 5.1 功能测试
 
-直接在func_src文件夹下make就能获得可以用于功能测试的bin、coe、mif了
+在nscscc_func文件夹下make就能获得可以用于功能测试的bin、coe、mif了
 
 ```
-$ cd $CHIPLAB_HOME/software/examples/func/func_src
+$ cd $CHIPLAB_HOME/software/examples/nscscc_func
 $ make clean
 $ make
 ```
@@ -152,4 +154,9 @@ $ make
 
 ### 5.2 性能测试
 
-待合并
+```
+$ cd $CHIPLAB_HOME/software/examples/nscscc_perf
+$ make clean
+$ make
+```
+在obj文件夹下即可获得所需文件

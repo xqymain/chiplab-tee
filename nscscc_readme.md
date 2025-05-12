@@ -55,8 +55,9 @@ Chiplab支持龙芯杯团体赛的功能测试与性能测试，有关Chiplab的
 ├── software&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&ensp;测试用例。   
 │　　├── bsp&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;板级支持包。   
 │　　├── examples&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;示例程序。   
-│　　　　　├── func&emsp;&emsp;&emsp;&emsp;<font color='red'>功能测试，验证处理器核设计是否与指令手册一致，龙芯杯也使用该目录下的func_src进行功能测试。</font>   
-│　　　　　├── nscscc_perf&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;<font color='red'>性能测试，包含20个性能测试程序。</font>   
+│　　　　　├── func&emsp;&emsp;&emsp;&emsp;功能测试，验证处理器核设计是否与指令手册一致。
+│　　　　　├── nscscc_func&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;<font color='red'>龙芯杯功能测试，仅含Makefile，使用func/func_src的源文件。</font>  
+│　　　　　├── nscscc_perf&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;<font color='red'>龙芯杯性能测试，包含20个性能测试程序。</font>   
 │　　　　　├── hello_world&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&ensp;基础测试程序。   
 │　　　　　├── coremark&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&ensp;coremark性能测试程序。   
 │　　　　　├── dhrystone&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&ensp;dhrystone性能测试程序。  
@@ -172,19 +173,13 @@ module core_top(
 
 具体使用方法请参考[verilator仿真环境说明](https://chiplab.readthedocs.io/zh/latest/Simulation/verilator.html)。
 
-需要注意的是，在运行func测试时，需根据处理器核情况更改`chiplab/software/func/func_src/Makefile`中第四行`CACHEFLAGS = -Dhas_cache=0`，为0时，start.s 不使用 cacop指令。
-
 ### 4.2 基于Vivado进行功能测试和性能测试的前仿真
 
 1）【myCPU加入】首先确保已经替换`IP/myCPU`中的处理器核代码
 
 2）【编译software】发布包默认提供编译好的obj。
 
-特别注意：功能测试和性能测试发布包中默认提供的obj为无chache版本，若实现了cache和cacop指令，需要将`chiplab/software/examples/nscscc_perf/Makefile`文件的第二行改为`AFLAGS+=-Dhas_cache=1`。将`chiplab/software/examples/func/func_src/Makefile`文件的第四行改为`CACHEFLAGS = -Dhas_cache=1`。该宏置为1后会使用cacop指令在每次复位后执行cache初始化。
-
-同时将`-Dcache_index_depth=0x100 -Dcache_offset_width=0x4 -Dcache_way=2`修改为对应值，分别是index深度，offset位宽，way。
-
-之后重新编译性能测试：
+若希望重新编译性能测试：
 
 ```
 cd $CHIPLAB_HOME/software/examples/nscscc_perf  #进入性能测试目录
@@ -195,12 +190,12 @@ make                                            #执行性能测试编译
 重新编译功能测试：
 
 ```
-cd $CHIPLAB_HOME/software/examples/func/func_src #进入功能测试目录
+cd $CHIPLAB_HOME/software/examples/nscscc_func   #进入功能测试目录
 make clean                                       #清除已有编译结果
 make                                             #执行功能测试编译
 ```
 
-完成编译后，在software/examples/func/func_src/obj目录下可以看到功能测试的编译结果
+完成编译后，在software/examples/nscscc_func/obj目录下可以看到功能测试的编译结果
 
 | 文件名     | 解释     |
 | -------- | -------- |
@@ -261,7 +256,7 @@ source create_project.tcl
 
 5）【进行功能测试仿真】
 
-首先修改 `$CHIPLAB_HOME/chip/soc_demo/nscscc-team/soc_config.vh`头文件，打开 `RUN_FUNC_TEST`宏，关闭`RUN_PERF_TEST`宏。该文件还存在两个可供调整的宏`SIMU_USE_PLL`和`SIMU_USE_DDR`，`SIMU_USE_PLL`为1时使用PLL产生时钟，为0时使用仿真时钟；`SIMU_USE_DDR`为1时使用DDR3作为内存，为0时使用仿真SRAM模型作为内存。两者均为0时仿真速度最快，为1时更符合上FPGA板的情况。
+首先修改 `$CHIPLAB_HOME/chip/soc_demo/nscscc-team/soc_config.vh`头文件，打开 `RUN_FUNC_TEST`宏，关闭`RUN_PERF_TEST`宏。该文件还存在两个可供调整的宏`SIMU_USE_PLL`和`SIMU_USE_DDR`，`SIMU_USE_PLL`为1时使用PLL产生时钟，为0时使用仿真时钟；`SIMU_USE_DDR`为1时使用DDR3作为内存，为0时使用仿真SRAM模型作为内存。两者均为0时仿真速度最快，为1时更符合上FPGA板的情况。`SIMU_USE_DDR`为1时仿真极慢，运行stream_copy测试程序大约需要15小时，建议仅在上板与仿真不一致且怀疑访存问题时打开该宏。
 
 完成宏的修改后在Vivado中点击Run Simulation。打开仿真界面后在控制台Tcl Console中执行下列命令，进行地址切换与调用tcl脚本执行仿真：
 
@@ -324,7 +319,7 @@ source ../run_allbench.tcl
 
 ```
 # set bin_file [open "../inst_data.bin" "rb"]
-set bin_file [open "../../../../software/examples/func/func_src/obj/main.bin" "rb"]
+set bin_file [open "../../../../software/examples/nscscc_func/obj/main.bin" "rb"]
 # set bin_file [open "../../../../software/examples/nscscc_perf/obj/allbench/inst_data.bin" "rb"]
 ```
 
@@ -377,7 +372,7 @@ ReadRegsToFile 0x1c000000 10 ../log.txt
 
 ```
 # set bin_file [open "../inst_data.bin" "rb"]
-# set bin_file [open "../../../../software/examples/func/func_src/obj/main.bin" "rb"]
+# set bin_file [open "../../../../software/examples/nscscc_func/obj/main.bin" "rb"]
 set bin_file [open "../../../../software/examples/nscscc_perf/obj/allbench/inst_data.bin" "rb"]
 ```
 

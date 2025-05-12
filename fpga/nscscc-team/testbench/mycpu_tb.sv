@@ -42,7 +42,7 @@ THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 `define UART_WADDR              u_soc_top.APB_DEV.uart0.PADDR[7:0]
 `define UART_WDATA              u_soc_top.APB_DEV.uart0.PWDATA[7:0]
 `define MIG_AXI                 u_soc_top.ddr3.u_axi_wrap_ddr.mig_axi
-`define END_PC 32'h1c000100
+`define END_PC 32'h1c000200
 
 
 

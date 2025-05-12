@@ -24,7 +24,7 @@ start:
     li.w     t0, 0xffffffff
     addi.w t0, zero, -1
 
-
+/*
 #if has_cache==1
     # invalid the old inst in icache and old data in dcache by index
     li.w t0,0x0
@@ -55,11 +55,11 @@ start:
     bne       t0, t2, 1b
 #else
     #ifdef vivado
-    /* disable   cache */
     li.w    $r12,0x1
     csrwr	$r12,0x101
     #endif
 #endif
+*/
 
 #ifdef CSR_INIT
     ori    $r1,$r0,0x28
@@ -82,7 +82,7 @@ start:
     or        t2, t0, zero
     add.w     t3, t5, t6
     ld.w      t4, t0, 0
-.org 0x100
+.org 0x200
 test_finish:
     addi.w    t0, t0, 1
     LI        (t2, UART_ADDR)
@@ -90,7 +90,7 @@ test_finish:
 //    .word 0x80000000 // nemu trap
     nop
     b   1f
-.org 0x130
+.org 0x230
 1:
     syscall 0x11
 

@@ -17,37 +17,104 @@
 	.globl	__main
 _start:
 start:
-#if has_cache==1
-    # invalid the old inst in icache and old data in dcache by index
-    li.w t0,0x0
-    #li.w t2,0x100
-    li.w t2, cache_index_depth
-1: 
-    #slli.w    t1, t0, 0x4
-    slli.w    t1, t0, cache_offset_width
-#if cache_way==1
-    cacop     0x00, t1, 0x0 
-    cacop     0x01, t1, 0x0
-#elif cache_way==2
-    cacop     0x00, t1, 0x0 
-    cacop     0x00, t1, 0x1
-    cacop     0x01, t1, 0x0
-    cacop     0x01, t1, 0x1
-#elif cache_way==4
-    cacop     0x00, t1, 0x0 
-    cacop     0x00, t1, 0x1
-    cacop     0x00, t1, 0x2 
-    cacop     0x00, t1, 0x3
-    cacop     0x01, t1, 0x0
-    cacop     0x01, t1, 0x1
-    cacop     0x01, t1, 0x2
-    cacop     0x01, t1, 0x3
-#endif
-    addi.w    t0, t0, 0x1
-    bne       t0, t2, 1b
-#else
+    li.w t0, 0x10
+    cpucfg t5, t0
+    li.w t6, 0x1
+    and t7, t5, t6
+    bne t7, t6, 11f
 
-#endif
+    # init L1 I-Cache
+    li.w t0, 0x11
+    # t6 cache size
+    cpucfg t6, t0
+    # t0 WAY
+    li.w t7, 0xffff
+    and t0, t6, t7
+    addi.w t0, t0, 0x1
+    # t1 LINE
+    srli.w t7, t6, 16
+    andi t7, t7, 0xff
+    li.w t1, 0x1
+    sll.w t1, t1, t7
+    # t8 OFFSET
+    srli.w t8, t6, 24
+    li.w t2, 0
+1:  
+    li.w t3, 0
+2:
+    sll.w t4, t3, t8
+    or t4, t4, t2
+    cacop 0x0, t4, 0
+    addi.w t3, t3, 0x1
+    bne t3, t1, 2b
+    addi.w t2, t2, 0x1
+    bne t2, t0, 1b
+
+11:
+    li.w t6, 0x4
+    and t7, t5, t6
+    bne t7, t6, 11f
+
+    # init L1 D-Cache
+    li.w t0, 0x12
+    # t6 cache size
+    cpucfg t6, t0
+    # t0 WAY
+    li.w t7, 0xffff
+    and t0, t6, t7
+    addi.w t0, t0, 0x1
+    # t1 LINE
+    srli.w t7, t6, 16
+    andi t7, t7, 0xff
+    li.w t1, 0x1
+    sll.w t1, t1, t7
+    # t8 OFFSET
+    srli.w t8, t6, 24
+    li.w t2, 0
+1:  
+    li.w t3, 0
+2:
+    sll.w t4, t3, t8
+    or t4, t4, t2
+    cacop 0x1, t4, 0
+    addi.w t3, t3, 0x1
+    bne t3, t1, 2b
+    addi.w t2, t2, 0x1
+    bne t2, t0, 1b
+
+11:
+    li.w t6, 0x18
+    and t7, t5, t6
+    bne t7, t6, 11f
+
+    # init L2 Cache
+    li.w t0, 0x13
+    # t6 cache size
+    cpucfg t6, t0
+    # t0 WAY
+    li.w t7, 0xffff
+    and t0, t6, t7
+    addi.w t0, t0, 0x1
+    # t1 LINE
+    srli.w t7, t6, 16
+    andi t7, t7, 0xff
+    li.w t1, 0x1
+    sll.w t1, t1, t7
+    # t8 OFFSET
+    srli.w t8, t6, 24
+    li.w t2, 0
+1:  
+    li.w t3, 0
+2:
+    sll.w t4, t3, t8
+    or t4, t4, t2
+    cacop 0x2, t4, 0
+    addi.w t3, t3, 0x1
+    bne t3, t1, 2b
+    addi.w t2, t2, 0x1
+    bne t2, t0, 1b
+
+11:
 
     csrwr	$r0,0x180
     csrwr	$r0,0x181
@@ -95,17 +162,15 @@ start:
 	bltu t0, t1, 1b
 2:
 
-#if has_cache==1
     ori	    $r12,$r0,0x19
     csrwr	$r12,0x180
-#endif
 
 	la.local	sp, _stack
     
     b run_test    #####          
 
 
-.org 0x100
+.org 0x200
 test_finish:
     addi.w    t0, t0, 1
     li.w      t2, UART_ADDR
