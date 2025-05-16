@@ -21,11 +21,11 @@ $ bash
 
 3. C库 从picolibc和newlib中二选一即可，推荐picolibc，software中的makefile默认使用picolibc，若使用newlib需对makefile进行少量修改，详见software/README.md
 
-3.1 [picolibc](https://gitee.com/ffshff/la32r-picolibc/releases/tag/V1.0)
+3.1 [picolibc](https://gitee.com/ffshff/la32r-picolibc/releases/tag/v1.1)
 
 在当前目录`mkdir picolibc`，然后将`picolibc.tar.gz`解压到`picolibc`目录。
 
-3.2 [newlib](https://gitee.com/ffshff/newlib-la32r/releases/tag/V1.0)
+3.2 [newlib](https://gitee.com/ffshff/newlib-la32r/releases/tag/V1.1)
 
 在当前目录`mkdir newlib`，然后将`newlib.tar.gz`解压到`newlib`目录。
 

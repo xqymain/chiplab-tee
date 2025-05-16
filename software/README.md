@@ -59,6 +59,16 @@ $ make
 ```
 生成的obj文件夹中有仿真和上板所需bin文件。
 
+之后修改fpga/nscscc-team/testbench/mycpu_tb.sv文件，将宏
+```
+`define CONFREG_NUM_MONITOR     u_soc_top.u_confreg.num_monitor
+```
+改为
+```
+`define CONFREG_NUM_MONITOR     1'h0
+```
+这样可以避免串口输出信息被$display信息覆盖。
+
 在Vivado中点击Run Simulation。打开仿真界面后在控制台Tcl Console中执行下列命令，进行地址切换、更换内存初始化文件、重新开始仿真。
 
 ```
