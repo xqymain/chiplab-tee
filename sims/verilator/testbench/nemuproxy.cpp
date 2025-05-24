@@ -26,13 +26,23 @@ NemuProxy::NemuProxy(int coreid) {
     }
     printf("Using %s for difftest\n", difftest_ref_so);
 
-#ifdef __linux__
-    handle =
-            dlmopen(LM_ID_NEWLM, difftest_ref_so, RTLD_LAZY | RTLD_DEEPBIND);
+#if defined(__linux__)
+    handle = dlmopen(LM_ID_NEWLM, difftest_ref_so, RTLD_LAZY | RTLD_DEEPBIND);
     if (!handle) {
         printf("%s\n", dlerror());
         assert(0);
     }
+#elif defined(__APPLE__)
+    handle = dlopen(difftest_ref_so, RTLD_LAZY);
+    if (!handle) {
+        printf("%s\n", dlerror());
+        assert(0);
+    }
+#else
+    printf("The current platform is not supported.\n");
+    exit(1);
+#endif
+    
     this->memcpy = (void (*)(paddr_t, void*, size_t, bool))dlsym(
             handle, "difftest_memcpy");
     check_and_assert(this->memcpy);
@@ -77,10 +87,6 @@ NemuProxy::NemuProxy(int coreid) {
     check_and_assert(nemu_init);
 
     nemu_init();
-#else
-    printf("The current platform is not supported.\n");
-    exit(1);
-#endif
 #endif
 }
 
