@@ -144,7 +144,7 @@ module axi3_to_axi4_bridge #(
     encode_4_2 u_aw_ptr(.in(state_aw_sending), .out(aw_ptr));
     encode_4_2 u_w_ptr (.in(state_w_sending), .out(w_ptr));
 
-    wire can_send_aw = !(|state_aw_sending) || (m_axi4_arvalid & m_axi4_arready);
+    wire can_send_aw = !(|state_aw_sending) || (m_axi4_awvalid & m_axi4_awready);
 
     wire [3:0] awid_one;
     first_one_id u_awid_one (.id0(buffer_awid[0]), .id1(buffer_awid[1]),
