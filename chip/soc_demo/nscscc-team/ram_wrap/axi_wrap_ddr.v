@@ -200,6 +200,16 @@ first_one_4_4 u_sel_wait_lastr (.in(state_wait_lastr), .out(state_wait_lastr_one
 reg [31:0] r_countcmp;
 reg [31:0] r_count [3:0];
 
+//解决ar和rlast同时握手引发的状态机卡死
+reg r_with_no_wait;
+always @(posedge aclk or negedge aresetn) begin
+    if(~aresetn)
+        r_with_no_wait <= 1'b0;
+    else begin
+        r_with_no_wait <= (!(|state_wait_lastr)) & axi_rvalid & axi_rready & axi_rlast;
+    end
+end
+
 genvar i;
 generate 
 for(i=0; i<4;i=i+1) begin
@@ -236,7 +246,7 @@ for(i=0; i<4;i=i+1) begin
                     next_rstate[i] = S_WAIT_R;
             end
             S_WAIT_LAST_R : begin
-                if(state_wait_lastr_one[i] & axi_rvalid & axi_rready & axi_rlast)
+                if(state_wait_lastr_one[i] & ((axi_rvalid & axi_rready & axi_rlast) | r_with_no_wait))
                     next_rstate[i] = S_DELAY_R;
                 else
                     next_rstate[i] = S_WAIT_LAST_R;
@@ -362,6 +372,16 @@ first_one_4_4 u_sel_wait_lastb (.in(state_wait_lastb), .out(state_wait_lastb_one
 reg [31:0] b_countcmp;
 reg [31:0] b_count [3:0];
 
+//解决w和b同时握手引发的状态机卡死
+reg b_with_no_wait;
+always @(posedge aclk or negedge aresetn) begin
+    if(~aresetn)
+        b_with_no_wait <= 1'b0;
+    else begin
+        b_with_no_wait <= (!(|state_wait_lastb)) & axi_bvalid & axi_bready;
+    end
+end
+
 genvar j;
 generate 
 for(j=0; j<4;j=j+1) begin
@@ -398,7 +418,7 @@ for(j=0; j<4;j=j+1) begin
                     next_bstate[j] = S_WAIT_B;
             end
             S_WAIT_LAST_B : begin
-                if(state_wait_lastb_one[j] & axi_bvalid & axi_bready)
+                if(state_wait_lastb_one[j] & ((axi_bvalid & axi_bready) | b_with_no_wait))
                     next_bstate[j] = S_DELAY_B;
                 else
                     next_bstate[j] = S_WAIT_LAST_B;
