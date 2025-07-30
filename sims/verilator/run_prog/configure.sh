@@ -468,7 +468,6 @@ do
             mkdir -p ./obj/
             mkdir -p ./log/
             ;;
-        *)
         lacc)
             RUN_FUNC=n
             RUN_C=y
@@ -478,6 +477,7 @@ do
             mkdir -p ./obj/
             mkdir -p ./log/
             ;;
+        *)
             echo "Software $software unavailable!!" 
             exit
             ;;
