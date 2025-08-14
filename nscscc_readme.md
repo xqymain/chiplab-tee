@@ -55,7 +55,7 @@ Chiplab支持龙芯杯团体赛的功能测试与性能测试，有关Chiplab的
 ├── software&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&ensp;测试用例。   
 │　　├── bsp&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;板级支持包。   
 │　　├── examples&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;示例程序。   
-│　　　　　├── func&emsp;&emsp;&emsp;&emsp;功能测试，验证处理器核设计是否与指令手册一致。
+│　　　　　├── func&emsp;&emsp;&emsp;&emsp;功能测试，验证处理器核设计是否与指令手册一致。  
 │　　　　　├── nscscc_func&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;<font color='red'>龙芯杯功能测试，仅含Makefile，使用func/func_src的源文件。</font>  
 │　　　　　├── nscscc_perf&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;<font color='red'>龙芯杯性能测试，包含20个性能测试程序。</font>   
 │　　　　　├── hello_world&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&ensp;基础测试程序。   
@@ -70,7 +70,7 @@ Chiplab支持龙芯杯团体赛的功能测试与性能测试，有关Chiplab的
 └── toolchains&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;chiplab运行所需工具。    
 　　　├── loongarch32r-linux-gnusf-\*&emsp;&emsp;&emsp;gcc工具链。  
 　　　├── nemu&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;nemu模拟器，用于在线实时比对。   
-　　　├── picolibc&emsp;&emsp;&emsp;&emsp;picolibc库，用于编译C程序。
+　　　├── picolibc&emsp;&emsp;&emsp;&emsp;picolibc库，用于编译C程序。  
 　　　└── newlib&emsp;&emsp;&emsp;&emsp;newlib C库，用于编译C程序。
 
 ## 3. 环境下载与安装
@@ -171,7 +171,7 @@ module core_top(
 - `run_prog` : 该工作目录下可运行`func`测试用例、`dhrystone`、`coremark`性能测试程序、`linux`以及自定义C程序。
 - `run_random` : 该工作目录下可进行随机指令序列测试。 
 
-具体使用方法请参考[verilator仿真环境说明](https://chiplab.readthedocs.io/zh/latest/Simulation/verilator.html)。
+具体使用方法请参考[verilator仿真环境说明](https://chiplab.readthedocs.io/zh-cn/latest/Simulation/verilator.html)。
 
 ### 4.2 基于Vivado进行功能测试和性能测试的前仿真
 
@@ -382,7 +382,7 @@ cd [get_property DIRECTORY [current_project]]
 source ../jtag_axi_master.tcl
 ```
 
-下载 allbench 的 bin 文件后，在实验板上使用 8 个拨码开关的右侧 4 个选择运行哪个测试，随后按复位键，开始运行由拨码开关指定的测试。约定拨码开关拨上为 1，拨下为 0，则 4 个拨码开关与性能测试程序的对应关系如下表。
+下载 allbench 的 bin 文件后，在实验板上使用 8 个拨码开关的右侧 5 个选择运行哪个测试，随后按复位键，开始运行由拨码开关指定的测试。约定拨码开关拨上为 1，拨下为 0，则 5 个拨码开关与性能测试程序的对应关系如下表。
 
 | 序号     | 运行的测试程序     | 拨码开关状态     |
 | -------- | -------- | -------- |
