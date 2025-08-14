@@ -5,7 +5,7 @@ set_property CLOCK_DEDICATED_ROUTE BACKBONE [get_nets clk]
 create_clock -period 10.000 -name clk -waveform {0.000 5.000} [get_ports clk]
 
 #reset
-set_property PACKAGE_PIN Y3 [get_ports resetn]
+set_property PACKAGE_PIN Y3 [get_ports resetn_fpga]
 
 
 #LED
@@ -33,7 +33,7 @@ set_property PACKAGE_PIN B5 [get_ports {led_rg1[0]}]
 set_property PACKAGE_PIN D6 [get_ports {led_rg1[1]}]
 
 #NUM
-set_property PACKAGE_PIN D3 [get_ports {num_csn[7]}]
+set_property PACKAGE_PIN D3  [get_ports {num_csn[7]}]
 set_property PACKAGE_PIN D25 [get_ports {num_csn[6]}]
 set_property PACKAGE_PIN D26 [get_ports {num_csn[5]}]
 set_property PACKAGE_PIN E25 [get_ports {num_csn[4]}]
@@ -52,28 +52,28 @@ set_property PACKAGE_PIN A2 [get_ports {num_a_g[6]}]
 #set_property PACKAGE_PIN C4 :DP
 
 #switch
-set_property PACKAGE_PIN AC21 [get_ports {switch[7]}]
-set_property PACKAGE_PIN AD24 [get_ports {switch[6]}]
-set_property PACKAGE_PIN AC22 [get_ports {switch[5]}]
-set_property PACKAGE_PIN AC23 [get_ports {switch[4]}]
-set_property PACKAGE_PIN AB6 [get_ports {switch[3]}]
-set_property PACKAGE_PIN W6 [get_ports {switch[2]}]
-set_property PACKAGE_PIN AA7 [get_ports {switch[1]}]
-set_property PACKAGE_PIN Y6 [get_ports {switch[0]}]
+set_property PACKAGE_PIN AC21 [get_ports {switch_fpga[7]}]
+set_property PACKAGE_PIN AD24 [get_ports {switch_fpga[6]}]
+set_property PACKAGE_PIN AC22 [get_ports {switch_fpga[5]}]
+set_property PACKAGE_PIN AC23 [get_ports {switch_fpga[4]}]
+set_property PACKAGE_PIN AB6  [get_ports {switch_fpga[3]}]
+set_property PACKAGE_PIN W6   [get_ports {switch_fpga[2]}]
+set_property PACKAGE_PIN AA7  [get_ports {switch_fpga[1]}]
+set_property PACKAGE_PIN Y6   [get_ports {switch_fpga[0]}]
 
 #btn_key
-set_property PACKAGE_PIN V8 [get_ports {btn_key_col[0]}]
-set_property PACKAGE_PIN V9 [get_ports {btn_key_col[1]}]
-set_property PACKAGE_PIN Y8 [get_ports {btn_key_col[2]}]
-set_property PACKAGE_PIN V7 [get_ports {btn_key_col[3]}]
-set_property PACKAGE_PIN U7 [get_ports {btn_key_row[0]}]
-set_property PACKAGE_PIN W8 [get_ports {btn_key_row[1]}]
-set_property PACKAGE_PIN Y7 [get_ports {btn_key_row[2]}]
+set_property PACKAGE_PIN V8  [get_ports {btn_key_col[0]}]
+set_property PACKAGE_PIN V9  [get_ports {btn_key_col[1]}]
+set_property PACKAGE_PIN Y8  [get_ports {btn_key_col[2]}]
+set_property PACKAGE_PIN V7  [get_ports {btn_key_col[3]}]
+set_property PACKAGE_PIN U7  [get_ports {btn_key_row[0]}]
+set_property PACKAGE_PIN W8  [get_ports {btn_key_row[1]}]
+set_property PACKAGE_PIN Y7  [get_ports {btn_key_row[2]}]
 set_property PACKAGE_PIN AA8 [get_ports {btn_key_row[3]}]
 
 #btn_step
-set_property PACKAGE_PIN Y5 [get_ports {btn_step[0]}]
-set_property PACKAGE_PIN V6 [get_ports {btn_step[1]}]
+set_property PACKAGE_PIN Y5 [get_ports {btn_step_fpga[0]}]
+set_property PACKAGE_PIN V6 [get_ports {btn_step_fpga[1]}]
 
 #uart
 set_property PACKAGE_PIN F23 [get_ports UART_RX]
@@ -82,16 +82,16 @@ set_property PACKAGE_PIN H19 [get_ports UART_TX]
 set_property IOSTANDARD LVCMOS33 [get_ports UART_TX]
 
 set_property IOSTANDARD LVCMOS33 [get_ports clk]
-set_property IOSTANDARD LVCMOS33 [get_ports resetn]
+set_property IOSTANDARD LVCMOS33 [get_ports resetn_fpga]
 set_property IOSTANDARD LVCMOS33 [get_ports {led[*]}]
 set_property IOSTANDARD LVCMOS33 [get_ports {led_rg0[*]}]
 set_property IOSTANDARD LVCMOS33 [get_ports {led_rg1[*]}]
 set_property IOSTANDARD LVCMOS33 [get_ports {num_a_g[*]}]
 set_property IOSTANDARD LVCMOS33 [get_ports {num_csn[*]}]
-set_property IOSTANDARD LVCMOS33 [get_ports {switch[*]}]
+set_property IOSTANDARD LVCMOS33 [get_ports {switch_fpga[*]}]
 set_property IOSTANDARD LVCMOS33 [get_ports {btn_key_col[*]}]
 set_property IOSTANDARD LVCMOS33 [get_ports {btn_key_row[*]}]
-set_property IOSTANDARD LVCMOS33 [get_ports {btn_step[*]}]
+set_property IOSTANDARD LVCMOS33 [get_ports {btn_step_fpga[*]}]
 
 
 # set_false_path -from [get_clocks -of_objects [get_pins fpga_pll.u_clk_pll/inst/plle2_adv_inst/CLKOUT1]] -to [get_clocks -of_objects [get_pins fpga_pll.u_clk_pll/inst/plle2_adv_inst/CLKOUT0]]

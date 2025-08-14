@@ -57,7 +57,7 @@ THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 module soc_top #(parameter SIMULATION=1'b0)
 (
-    input         resetn, 
+    input         resetn_fpga, 
     input         clk,
 
     //------DDR3 interface------
@@ -82,15 +82,46 @@ module soc_top #(parameter SIMULATION=1'b0)
     output [1 :0] led_rg1,
     output [7 :0] num_csn,
     output [6 :0] num_a_g,
-    input  [7 :0] switch, 
+    input  [7 :0] switch_fpga, 
     output [3 :0] btn_key_col,
     input  [3 :0] btn_key_row,
-    input  [1 :0] btn_step,
+    input  [1 :0] btn_step_fpga,
 
     //------uart-------
     inout         UART_RX,
     inout         UART_TX
 );
+
+wire [31:0] num_data;
+wire resetn_vio;
+wire resetn;
+wire [7:0] switch_vio;
+wire [7:0] switch;
+wire [1:0] btn_step_vio;
+wire [1:0] btn_step;
+reg        virtual_flag;
+
+assign resetn = resetn_fpga & resetn_vio;
+always @ (posedge clk) begin
+	if      (!resetn_vio ) virtual_flag <= 1'b1;
+	else if (!resetn_fpga) virtual_flag <= 1'b0;
+end
+
+assign switch   = virtual_flag ? switch_vio   : switch_fpga;
+assign btn_step = virtual_flag ? btn_step_vio : btn_step_fpga;
+
+
+vio_0 vio (
+        .clk       (clk),
+        .probe_out0(resetn_vio),
+        .probe_out1(switch_vio),
+        .probe_out2(btn_step_vio),
+        .probe_in0 (led),
+        .probe_in1 (num_data),
+        .probe_in2 (led_rg0 ),
+        .probe_in3 (led_rg1 )
+    );
+
 //debug signals
 wire [31:0] debug_wb_pc;
 wire [3 :0] debug_wb_rf_wen;
@@ -995,7 +1026,8 @@ confreg #(.SIMULATION(SIMULATION)) u_confreg
     .led_rg0     ( led_rg0    ),  // o, 2      
     .led_rg1     ( led_rg1    ),  // o, 2      
     .num_csn     ( num_csn    ),  // o, 8      
-    .num_a_g     ( num_a_g    ),  // o, 7      
+    .num_a_g     ( num_a_g    ),  // o, 7
+    .num_data    ( num_data   ),  // o, 32      
     .switch      ( switch     ),  // i, 8     
     .btn_key_col ( btn_key_col),  // o, 4          
     .btn_key_row ( btn_key_row),  // i, 4           
