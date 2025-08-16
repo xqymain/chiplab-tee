@@ -66,6 +66,9 @@ switch $test {
         }
     }
     "func" {
+        set outfile [open "func_vio.csv" w]
+        puts $outfile "func_result"
+
         # This script is used to reset the VIO core in the hardware design
         after 1000
         set_property OUTPUT_VALUE 0 [get_hw_probes resetn_vio]
@@ -81,6 +84,10 @@ switch $test {
         after 1000
         refresh_hw_vio [get_hw_vios {hw_vio_1}]
         set func_result [get_property INPUT_VALUE [get_hw_probes num_data]]
+        puts $func_result
+
+        puts $outfile "$func_result"
+        close $outfile
     }
 
 }
