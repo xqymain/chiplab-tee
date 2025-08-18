@@ -21,6 +21,10 @@ add_files -norecurse "../../../IP/AMBA/axi2apb.v"
 
 # Add IPs
 add_files -quiet [glob -nocomplain ../../../chip/soc_demo/nscscc-team/xilinx_ip/*/*.xci]
+add_files -quiet [glob -nocomplain ../../../chip/soc_demo/nscscc-team/xilinx_ip/*/*.xcix]
+
+# Upgrade IPs
+upgrade_ip -quiet [get_ips]
 
 # Add simulation files
 add_files -fileset sim_1 ../testbench
