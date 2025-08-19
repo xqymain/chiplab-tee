@@ -99,8 +99,9 @@ set_property IOSTANDARD LVCMOS33 [get_ports {btn_step_fpga[*]}]
 
 create_generated_clock -name cpu_clk [get_pins fpga_pll.u_clk_pll/inst/plle2_adv_inst/CLKOUT0]
 create_generated_clock -name sys_clk [get_pins fpga_pll.u_clk_pll/inst/plle2_adv_inst/CLKOUT1]
-create_generated_clock -name ddr_clk [get_pins fpga_pll.u_clk_pll/inst/plle2_adv_inst/CLKOUT2]
+create_generated_clock -name ddr_clk [get_pins fpga_pll.u_clk_pll_ddr/inst/plle2_adv_inst/CLKOUT0]
 
-set_clock_groups -asynchronous  -group [get_clocks cpu_clk] \
+set_clock_groups -asynchronous  -group [get_clocks clk] \
+                                -group [get_clocks cpu_clk] \
                                 -group [get_clocks sys_clk] \
                                 -group [get_clocks ddr_clk]
