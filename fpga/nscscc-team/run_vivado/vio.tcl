@@ -40,8 +40,8 @@ switch $test {
             set_property OUTPUT_VALUE 1 [get_hw_probes resetn_vio]
             commit_hw_vio [get_hw_probes resetn_vio]
 
-            # Then wait 5 seconds, then read num data
-            after 5000
+            # Then wait 10 seconds, then read num data
+            after 10000
             refresh_hw_vio [get_hw_vios {hw_vio_1}]
             set correct_flag [get_property INPUT_VALUE [get_hw_probes led_rg0_OBUF]]
             puts $correct_flag
