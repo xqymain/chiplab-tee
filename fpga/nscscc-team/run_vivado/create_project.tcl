@@ -5,6 +5,8 @@ set project_part xc7a200tfbg676-2
 # CLEAR
 file delete -force $project_path
 file delete -force ../../../chip/soc_demo/nscscc-team/xilinx_ip/clk_pll/gen
+file delete -force ../../../chip/soc_demo/nscscc-team/xilinx_ip/clk_pll_ddr/gen
+file delete -force ../../../chip/soc_demo/nscscc-team/xilinx_ip/vio/gen
 file delete -force ../../../chip/soc_demo/nscscc-team/xilinx_ip/axi_crossbar_2x3/gen
 file delete -force ../../../chip/soc_demo/nscscc-team/xilinx_ip/jtag_axi/gen
 file delete -force ../../../chip/soc_demo/nscscc-team/xilinx_ip/mig_axi_32/gen

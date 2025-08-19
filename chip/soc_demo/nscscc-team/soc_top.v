@@ -136,6 +136,7 @@ wire sys_clk;
 wire ddr_clk_ref;
 wire core_rst_n;
 wire pll_locked;
+wire pll_locked_ddr;
 wire cpu_resetn;
 wire sys_resetn;
 wire confreg_resetn;
@@ -172,14 +173,19 @@ else if(SIMULATION && `SIMU_USE_PLL==1) begin: sim_pll_clk
     clk_pll u_clk_pll(
         .cpu_clk    (cpu_clk),
         .sys_clk    (sys_clk),
-        .ddr_clk    (ddr_clk_ref),
         .resetn     (resetn),
         .locked     (pll_locked),
         .clk_in1    (clk)
     );
+    clk_pll_ddr u_clk_pll_ddr(
+        .ddr_clk    (ddr_clk_ref),
+        .resetn     (resetn),
+        .locked     (pll_locked_ddr),
+        .clk_in1    (clk)
+    );
     rst_sync u_rst_sys(
         .clk(sys_clk),
-        .rst_n_in(pll_locked & ddr_data_init),
+        .rst_n_in(pll_locked & pll_locked_ddr & ddr_data_init),
         .rst_n_out(sys_resetn)
     );
     rst_sync u_rst_cpu(
@@ -194,14 +200,19 @@ else begin: fpga_pll
     clk_pll u_clk_pll(
         .cpu_clk    (cpu_clk),
         .sys_clk    (sys_clk),
-        .ddr_clk    (ddr_clk_ref),
         .resetn     (resetn),
         .locked     (pll_locked),
         .clk_in1    (clk)
     );
+    clk_pll_ddr u_clk_pll_ddr(
+        .ddr_clk    (ddr_clk_ref),
+        .resetn     (resetn),
+        .locked     (pll_locked_ddr),
+        .clk_in1    (clk)
+    );
     rst_sync u_rst_sys(
         .clk(sys_clk),
-        .rst_n_in(pll_locked & ddr_aresetn),
+        .rst_n_in(pll_locked & pll_locked_ddr & ddr_aresetn),
         .rst_n_out(sys_resetn)
     );
     rst_sync u_rst_cpu(
